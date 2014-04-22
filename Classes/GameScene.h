@@ -18,8 +18,14 @@ public:
 
     void CreateChesses(void);
 
-    ChessGame *pChessGame;
+    void resetChessGame();
+    bool checkChessMoveIsValid(UINT uiChessId, UINT uiPosX, UINT uiPosY);
+    void moveChess(UINT uiChessId, UINT uiPosX, UINT uiPosY);
+    static GameScene* getGameScene();
 
+private:
+    ChessGame* pChessGame;
+    UINT uiLastMoveColor;
 };
 
 #endif // __GAME_SCENE_H__
