@@ -1,4 +1,4 @@
-﻿//
+//
 //  chess.cpp
 //  chinese chess
 //

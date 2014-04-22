@@ -1,4 +1,4 @@
-﻿//
+//
 //  chess.h
 //  chinese chess
 //

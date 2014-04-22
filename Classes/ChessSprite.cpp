@@ -77,23 +77,23 @@ void ChessSprite::ccTouchEnded(CCTouch* touch, CCEvent* event)
 {
     this->stopAllActions();
     this->setZOrder(1);
-    //½«touch×ø±ê³õÊ¼»¯ÎªÆÁÄ»×ø±êÏµ
+    //å°†touchåæ ‡åˆå§‹åŒ–ä¸ºå±å¹•åæ ‡ç³»
     CCPoint point = touch->getLocation();
     point.y = CCEGLView::sharedOpenGLView()->getFrameSize().height - point.y;
 
-    //¼ÆËãÂäµãµÄ×ø±ê
+    //è®¡ç®—è½ç‚¹çš„åæ ‡
     UINT uiX = (point.x - 30.0) / 100.0 + 1;
     UINT uiY = (point.y - 20.0) / 60.0 + 1;
     CCLog("%d %d", uiX, uiY);
 
-    //ÅĞ¶ÏÂäµãºÏ·¨ĞÔ
+    //åˆ¤æ–­è½ç‚¹åˆæ³•æ€§
     if ((0 == uiX) || (0 == uiY) || (9 < uiX) || (10 < uiY))
     {
         setPosition(position);
         return;
     }
 
-    //¼ì²éÂäµãµÄÆ¥ÅäÇø¼ä
+    //æ£€æŸ¥è½ç‚¹çš„åŒ¹é…åŒºé—´
     CCPoint toPoint;
     toPoint.x = (uiX - 1) * 100 + 80;
     toPoint.y = (uiY - 1) * 60 + 50;
@@ -105,7 +105,7 @@ void ChessSprite::ccTouchEnded(CCTouch* touch, CCEvent* event)
         return;
     }
 
-    //ÅĞ¶ÏÂä×ÓÊÇ·ñ·ûºÏÓÎÏ·¹æÔò
+    //åˆ¤æ–­è½å­æ˜¯å¦ç¬¦åˆæ¸¸æˆè§„åˆ™
     if (false == GameScene::getGameScene()->checkChessMoveIsValid(uiChessId, uiX, uiY))
     {
         CCLog("chess moving is unfit for game, chess id :%d, move (%d, %d)", uiChessId, uiX, uiY);
@@ -113,11 +113,11 @@ void ChessSprite::ccTouchEnded(CCTouch* touch, CCEvent* event)
         return;
     }
 
-    //¿ÉÒÔÂä×Ó
+    //å¯ä»¥è½å­
     toPoint.y = CCEGLView::sharedOpenGLView()->getFrameSize().height - toPoint.y;
     setPosition(toPoint);
 
-    //ÓÉÆå¾Ö½øĞĞ¾ÖÃæ´¦Àí
+    //ç”±æ£‹å±€è¿›è¡Œå±€é¢å¤„ç†
     GameScene::getGameScene()->moveChess(uiChessId, uiX, uiY);
 
     return;

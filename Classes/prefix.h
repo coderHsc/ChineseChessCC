@@ -1,4 +1,4 @@
-﻿//
+//
 //  prefix.h
 //  chinese chess
 //
