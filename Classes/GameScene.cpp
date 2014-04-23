@@ -1,3 +1,4 @@
+#include "GameMenu.h"
 #include "GameScene.h"
 #include "ChessSprite.h"
 
@@ -25,7 +26,7 @@ bool GameScene::init(void)
 {
     CCSize size = CCDirector::sharedDirector()->getWinSize();
 
-    CCSprite *GameGround = CCSprite::create("ChessBackground.png");
+    CCSprite *GameGround = CCSprite::create("ChessBackground2.png");
     GameGround->setPosition(ccp(size.width * 0.5, size.height * 0.5));
     this->addChild(GameGround, 0);
 
@@ -115,7 +116,7 @@ void GameScene::moveChess(UINT uiChessId, UINT uiPosY, UINT uiPosX)
 
     if (CHESSTYPE_KING == pChessGame->GetChessType(uiTargetId))
     {
-        CCDirector::sharedDirector()->replaceScene(GameScene::scene());
+        CCDirector::sharedDirector()->replaceScene(GameMenu::scene());
     }
 
     return;

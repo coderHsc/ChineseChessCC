@@ -55,8 +55,8 @@ bool ChessSprite::ccTouchBegan(cocos2d::CCTouch* touch, cocos2d::CCEvent* event)
 
     if (true == ret)
     {
-        CCActionInterval* actionTo = CCRotateTo::create(2, 45);
-        CCActionInterval* actionBack = CCRotateTo::create(2, -45);
+        CCActionInterval* actionTo = CCRotateTo::create(0.5, 45);
+        CCActionInterval* actionBack = CCRotateTo::create(0.5, -45);
         CCAction* actionRep = CCRepeatForever::create((CCActionInterval*)CCSequence::create(actionTo, actionBack, NULL));
         this->runAction(actionRep);
         position = getPosition();
