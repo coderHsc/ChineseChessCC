@@ -50,13 +50,12 @@ void ChessSprite::onExit(void)
 bool ChessSprite::ccTouchBegan(cocos2d::CCTouch* touch, cocos2d::CCEvent* event)
 {
     CCPoint point = convertTouchToNodeSpaceAR(touch);
-    CCSize s = getTexture()->getContentSize();
-    bool ret = CCRectMake(-s.width / 2, -s.height / 2, s.width, s.height).containsPoint(point);
+	bool ret = CCRectMake(-25, -25, 50, 50).containsPoint(point);
 
     if (true == ret)
     {
-        CCActionInterval* actionTo = CCRotateTo::create(0.5, 45);
-        CCActionInterval* actionBack = CCRotateTo::create(0.5, -45);
+        CCActionInterval* actionTo = CCRotateTo::create(0.01f, 5);
+        CCActionInterval* actionBack = CCRotateTo::create(0.01f, -5);
         CCAction* actionRep = CCRepeatForever::create((CCActionInterval*)CCSequence::create(actionTo, actionBack, NULL));
         this->runAction(actionRep);
         position = getPosition();

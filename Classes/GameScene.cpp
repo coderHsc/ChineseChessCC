@@ -13,6 +13,49 @@ GameScene::GameScene()
 {
 }
 
+CCRect arrayChessImageText[CHESSID_MAX] = {
+	CCRect(0, 0, 0, 0),			//CHESSID_MIN = 0,
+
+	CCRect(0, 0, 50, 50),		//CHESSID_KING_BLACK,
+	CCRect(350, 0, 50, 50),		//CHESSID_KING_RED,
+
+	CCRect(50, 0, 50, 50),		//CHESSID_GUARD_BLACK_LEFT,
+	CCRect(50, 0, 50, 50),		//CHESSID_GUARD_BLACK_RIGNT,
+	CCRect(400, 0, 50, 50),		//CHESSID_GUARD_RED_LEFT,
+	CCRect(400, 0, 50, 50),		//CHESSID_GUARD_RED_RIGHT,
+
+	CCRect(100, 0, 50, 50),		//CHESSID_BISHOP_BLACK_LEFT,
+	CCRect(100, 0, 50, 50),		//CHESSID_BISHOP_BLACK_RIGNT,
+	CCRect(450, 0, 50, 50),		//CHESSID_BISHOP_RED_LEFT,
+	CCRect(450, 0, 50, 50),		//CHESSID_BISHOP_RED_RIGHT,
+
+	CCRect(150, 0, 50, 50),		//CHESSID_HORSE_BLACK_LEFT,
+	CCRect(150, 0, 50, 50),		//CHESSID_HORSE_BLACK_RIGNT,
+	CCRect(500, 0, 50, 50),		//CHESSID_HORSE_RED_LEFT,
+	CCRect(500, 0, 50, 50),		//CHESSID_HORSE_RED_RIGHT,
+
+	CCRect(200, 0, 50, 50),		//CHESSID_ROOK_BLACK_LEFT,
+	CCRect(200, 0, 50, 50),		//CHESSID_ROOK_BLACK_RIGNT,
+	CCRect(550, 0, 50, 50),		//CHESSID_ROOK_RED_LEFT,
+	CCRect(550, 0, 50, 50),		//CHESSID_ROOK_RED_RIGHT,
+
+	CCRect(250, 0, 50, 50),		//CHESSID_CANNON_BLACK_LEFT,
+	CCRect(250, 0, 50, 50),		//CHESSID_CANNON_BLACK_RIGNT,
+	CCRect(600, 0, 50, 50),		//CHESSID_CANNON_RED_LEFT,
+	CCRect(600, 0, 50, 50),		//CHESSID_CANNON_RED_RIGHT,
+
+	CCRect(300, 0, 50, 50),		//CHESSID_PAWN_BLACK_1,
+	CCRect(300, 0, 50, 50),		//CHESSID_PAWN_BLACK_2,
+	CCRect(300, 0, 50, 50),		//CHESSID_PAWN_BLACK_3,
+	CCRect(300, 0, 50, 50),		//CHESSID_PAWN_BLACK_4,
+	CCRect(300, 0, 50, 50),		//CHESSID_PAWN_BLACK_5,
+	CCRect(650, 0, 50, 50),		//CHESSID_PAWN_RED_1,
+	CCRect(650, 0, 50, 50),		//CHESSID_PAWN_RED_2,
+	CCRect(650, 0, 50, 50),		//CHESSID_PAWN_RED_3,
+	CCRect(650, 0, 50, 50),		//CHESSID_PAWN_RED_4,
+	CCRect(650, 0, 50, 50)		//CHESSID_PAWN_RED_5,
+};
+
 
 GameScene::~GameScene()
 {
@@ -52,7 +95,7 @@ void GameScene::CreateChesses(void)
 {
     CCLog("*********CreateChesses****************");
     std::vector<std::vector<UINT> > vecMatrix = pChessGame->GetMatrix();
-    CCTexture2D *pSpriteText = CCTextureCache::sharedTextureCache()->addImage("Chesses.png");
+    CCTexture2D *pSpriteText = CCTextureCache::sharedTextureCache()->addImage("ChessesM.png");
     float fHeight = CCEGLView::sharedOpenGLView()->getFrameSize().height;
     for (UINT uiLine = 1; uiLine <= CHESS_DATA_LINES; uiLine++)
     {
@@ -62,11 +105,11 @@ void GameScene::CreateChesses(void)
             {
                 continue;
             }
-            ChessSprite *pChess = ChessSprite::createWithTexture(pSpriteText, CCRectMake(10, 6, 80, 48));
-            CCPoint point = ccp(-20 + 100 * uiIndex, -10 + 60 * uiLine);
+			UINT uiId = pChessGame->GetChessID(uiLine, uiIndex);
+			ChessSprite *pChess = ChessSprite::createWithTexture(pSpriteText, arrayChessImageText[uiId]);
+			CCPoint point = ccp(-20 + 100 * uiIndex, -10 + 60 * uiLine);
             point.y = fHeight - point.y;
             pChess->setPosition(point);
-            UINT uiId = pChessGame->GetChessID(uiLine, uiIndex);
             pChess->setChessId(uiId);
             this->addChild(pChess, uiLine * 4 + uiIndex, CHESS_TAG_BASE + uiId);
         }
