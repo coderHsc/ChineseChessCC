@@ -16,15 +16,17 @@ public:
 
     CREATE_FUNC(GameScene);
 
-    void CreateChesses(void);
-
-    void resetChessGame();
-    bool checkChessMoveIsValid(UINT uiChessId, UINT uiPosX, UINT uiPosY);
+    virtual bool checkChessMoveIsValid(UINT uiChessId, UINT uiPosX, UINT uiPosY);
     void moveChess(UINT uiChessId, UINT uiPosX, UINT uiPosY);
     static GameScene* getGameScene();
+	static GameScene* pGameScene;
 
 private:
-    ChessGame* pChessGame;
+	void CreateChesses(void);
+
+	void resetChessGame();
+	
+	ChessGame* pChessGame;
     UINT uiLastMoveColor;
 };
 

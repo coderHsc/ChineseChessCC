@@ -10,8 +10,12 @@ public:
     GameMenu();
     ~GameMenu();
 
-    void menuCallback(CCObject * pSender);
-    void menuCloseCallback(CCObject* pSender);
+    void menuNormalGameCallback(CCObject* pSender);
+	void onMenuGetTestClicked(CCObject* pSender);
+	void onMenuPostTestClicked(CCObject* pSender);
+	void menuLanGameCallback(CCObject* pSender);
+
+	void menuCloseCallback(CCObject* pSender);
 
     virtual bool init(void);
     static cocos2d::CCScene* scene(void);

@@ -1,7 +1,11 @@
 #include "GameMenu.h"
 #include "GameScene.h"
+#include "GameSceneLan.h"
+
+#include "cocos-ext.h"
 
 USING_NS_CC;
+USING_NS_CC_EXT;
 
 GameMenu::GameMenu()
 {
@@ -19,10 +23,25 @@ bool GameMenu::init(void)
     CCMenu* pItemMenu = CCMenu::create();
     
     CCLabelTTF* label = CCLabelTTF::create("start", "Arial", 48);
-    CCMenuItemLabel* pMenuItem = CCMenuItemLabel::create(label, this, menu_selector(GameMenu::menuCallback));
+	CCMenuItemLabel* pMenuItem = CCMenuItemLabel::create(label, this, menu_selector(GameMenu::menuNormalGameCallback));
+
+	CCLabelTTF* labelNet = CCLabelTTF::create("netTest", "Arial", 48);
+	CCMenuItemLabel* pMenuItemNetTest = CCMenuItemLabel::create(labelNet, this, menu_selector(GameMenu::onMenuGetTestClicked));
+
+	CCLabelTTF* labelNetPost = CCLabelTTF::create("netPostTest", "Arial", 48);
+	CCMenuItemLabel* pMenuItemNetPostTest = CCMenuItemLabel::create(labelNetPost, this, menu_selector(GameMenu::onMenuPostTestClicked));
+
+	CCLabelTTF* labelLan = CCLabelTTF::create("LanGame", "Arial", 48);
+	CCMenuItemLabel* pMenuItemLanTest = CCMenuItemLabel::create(labelLan, this, menu_selector(GameMenu::menuLanGameCallback));
 
     pItemMenu->addChild(pMenuItem);
-    pMenuItem->setPosition(ccp(0, 0));
+	pItemMenu->addChild(pMenuItemNetTest);
+	pItemMenu->addChild(pMenuItemNetPostTest);
+	pItemMenu->addChild(pMenuItemLanTest);
+	pMenuItem->setPosition(ccp(0, 0));
+	pMenuItemNetTest->setPosition(ccp(0, 80));
+	pMenuItemLanTest->setPosition(ccp(0, 160));
+	pMenuItemNetPostTest->setPosition(ccp(0, 240));
 
     this->addChild(pItemMenu);
 
@@ -46,16 +65,22 @@ CCScene* GameMenu::scene(void)
     return scene;
 }
 
-void GameMenu::menuCallback(CCObject * pSender)
+void GameMenu::menuNormalGameCallback(CCObject* pSender)
 {
     // get the userdata, it's the index of the menu item clicked
     CCMenuItem* pMenuItem = (CCMenuItem *)(pSender);
-    int nIdx = pMenuItem->getZOrder() - 10000;
 
     // create the test scene and run it
     CCDirector::sharedDirector()->replaceScene(GameScene::scene());
 
     return;
+}
+
+void GameMenu::menuLanGameCallback(CCObject* pSender)
+{
+	CCDirector::sharedDirector()->replaceScene(GameSceneLan::scene());
+
+	return;
 }
 
 void GameMenu::menuCloseCallback(CCObject* pSender)
@@ -68,4 +93,31 @@ void GameMenu::menuCloseCallback(CCObject* pSender)
     exit(0);
 #endif
 #endif
+}
+
+void GameMenu::onMenuGetTestClicked(CCObject* pSender)
+{
+	CCHttpRequest* request = new CCHttpRequest();
+	request->setUrl("http://114.215.193.215:9090/pretestPrintRequest");
+	request->setRequestType(CCHttpRequest::kHttpGet);
+	//request->setResponseCallback(this, httpresponse_selector(HttpClientTest::onHttpRequestCompleted));
+	request->setTag("GET test1");
+	CCHttpClient::getInstance()->send(request);
+	request->release();
+}
+
+void GameMenu::onMenuPostTestClicked(CCObject* pSender)
+{
+	CCHttpRequest* request = new CCHttpRequest();
+	request->setUrl("http://114.215.193.215:9090/pretestPrintRequest");
+	request->setRequestType(CCHttpRequest::kHttpPost);
+	//request->setResponseCallback(this, httpresponse_selector(HttpClientTest::onHttpRequestCompleted));
+
+	// write the post data
+	char postData[22] = "binary=hello\0\0cocos2d";
+	request->setRequestData(postData, 22);
+
+	request->setTag("POST test1");
+	CCHttpClient::getInstance()->send(request);
+	request->release();
 }

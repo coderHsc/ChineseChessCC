@@ -6,7 +6,7 @@ USING_NS_CC;
 
 #define CHESS_TAG_BASE  100
 
-GameScene *pGameScene = NULL;
+GameScene* GameScene::pGameScene = NULL;
 
 GameScene::GameScene()
 :pChessGame(NULL), uiLastMoveColor(CHESSCOCLOR_MIN)
@@ -137,6 +137,7 @@ bool GameScene::checkChessMoveIsValid(UINT uiChessId, UINT uiPosY, UINT uiPosX)
 {
     if (uiLastMoveColor == pChessGame->GetChessColor(uiChessId))
     {
+		CCLog("chess move invalid, chess color: %d, last color: %d", pChessGame->GetChessColor(uiChessId), uiLastMoveColor);
         return false;
     }
     return pChessGame->CheckChessMoveValid(uiChessId, uiPosX, uiPosY);
