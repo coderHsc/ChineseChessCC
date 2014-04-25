@@ -17,7 +17,7 @@ public:
     CREATE_FUNC(GameScene);
 
     virtual bool checkChessMoveIsValid(UINT uiChessId, UINT uiPosX, UINT uiPosY);
-    void moveChess(UINT uiChessId, UINT uiPosX, UINT uiPosY);
+    virtual void moveChess(UINT uiChessId, UINT uiPosX, UINT uiPosY);
     static GameScene* getGameScene();
 	static GameScene* pGameScene;
 

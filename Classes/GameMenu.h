@@ -13,7 +13,7 @@ public:
     void menuNormalGameCallback(CCObject* pSender);
 	void onMenuGetTestClicked(CCObject* pSender);
 	void onMenuPostTestClicked(CCObject* pSender);
-	void menuLanGameCallback(CCObject* pSender);
+	void menuNetGameCallback(CCObject* pSender);
 
 	void menuCloseCallback(CCObject* pSender);
 

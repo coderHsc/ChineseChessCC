@@ -1,6 +1,6 @@
 #include "GameMenu.h"
 #include "GameScene.h"
-#include "GameSceneLan.h"
+#include "GameSceneNet.h"
 
 #include "cocos-ext.h"
 
@@ -31,8 +31,8 @@ bool GameMenu::init(void)
 	CCLabelTTF* labelNetPost = CCLabelTTF::create("netPostTest", "Arial", 48);
 	CCMenuItemLabel* pMenuItemNetPostTest = CCMenuItemLabel::create(labelNetPost, this, menu_selector(GameMenu::onMenuPostTestClicked));
 
-	CCLabelTTF* labelLan = CCLabelTTF::create("LanGame", "Arial", 48);
-	CCMenuItemLabel* pMenuItemLanTest = CCMenuItemLabel::create(labelLan, this, menu_selector(GameMenu::menuLanGameCallback));
+	CCLabelTTF* labelLan = CCLabelTTF::create("NetGame", "Arial", 48);
+	CCMenuItemLabel* pMenuItemLanTest = CCMenuItemLabel::create(labelLan, this, menu_selector(GameMenu::menuNetGameCallback));
 
     pItemMenu->addChild(pMenuItem);
 	pItemMenu->addChild(pMenuItemNetTest);
@@ -51,7 +51,7 @@ bool GameMenu::init(void)
     pCloseMenu->setPositionY(200);
     this->addChild(pCloseMenu);
 
-    return true;
+	return true;
 }
 
 CCScene* GameMenu::scene(void)
@@ -76,9 +76,9 @@ void GameMenu::menuNormalGameCallback(CCObject* pSender)
     return;
 }
 
-void GameMenu::menuLanGameCallback(CCObject* pSender)
+void GameMenu::menuNetGameCallback(CCObject* pSender)
 {
-	CCDirector::sharedDirector()->replaceScene(GameSceneLan::scene());
+	CCDirector::sharedDirector()->replaceScene(GameSceneNet::scene());
 
 	return;
 }
