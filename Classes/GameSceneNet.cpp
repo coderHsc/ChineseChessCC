@@ -8,6 +8,7 @@ USING_NS_CC;
 USING_NS_CC_EXT;
 
 GameSceneNet::GameSceneNet()
+:uiNetId(0), bCanMove(false)
 {
 }
 
@@ -19,6 +20,7 @@ GameSceneNet::~GameSceneNet()
 bool GameSceneNet::init(void)
 {
 	GameScene::init();
+	getNetIdFromServer();
     return true;
 }
 
@@ -41,6 +43,11 @@ GameScene* GameSceneNet::getGameScene()
 
 bool GameSceneNet::checkChessMoveIsValid(UINT uiChessId, UINT uiPosY, UINT uiPosX)
 {
+    if (false == this->bCanMove)
+    {
+        return false;
+    }
+
 	CCLog("GameSceneNet******chess move is valid");
 	return GameScene::checkChessMoveIsValid(uiChessId, uiPosY, uiPosX);
 }
@@ -88,7 +95,7 @@ void GameSceneNet::receiveMoveFromServer(CCHttpClient* client, CCHttpResponse* r
 {
 	if (!response->isSucceed())
 	{
-		CCLog("response failed");
+		CCLog("response failed in receiveMoveFromServer");
 		CCLog("error buffer: %s", response->getErrorBuffer());
 		return;
 	}
@@ -97,3 +104,39 @@ void GameSceneNet::receiveMoveFromServer(CCHttpClient* client, CCHttpResponse* r
 	std::string strBuff(buffer->begin(), buffer->end());
 	CCLog(strBuff.c_str());
 }
+
+void GameSceneNet::getNetIdFromServer()
+{
+	CCHttpRequest* request = new CCHttpRequest();
+	request->setUrl("http://192.168.1.176:9090/newIdGet");
+	request->setRequestType(CCHttpRequest::kHttpGet);
+	request->setResponseCallback(this, httpresponse_selector(GameSceneNet::receiveNetIdFromServer));
+	request->setTag("GET net id");
+	CCHttpClient::getInstance()->send(request);
+	request->release();
+}
+void GameSceneNet::receiveNetIdFromServer(CCHttpClient* client, CCHttpResponse* response)
+{
+	if (!response->isSucceed())
+	{
+		CCLog("response failed in receiveNetIdFromServer");
+		CCLog("error buffer: %s", response->getErrorBuffer());
+		return;
+	}
+
+	std::vector<char> *buffer = response->getResponseData();
+	std::string strBuff(buffer->begin(), buffer->end());
+	
+	UINT uiReadId = 0;
+	sscanf(strBuff.c_str(), "%d", &uiReadId);
+
+	if (0 == uiReadId)
+	{
+		CCLog("get net id %d error", uiReadId);
+		exit(0);
+	}
+
+	this->uiNetId = uiReadId;
+	CCLog("get net id %d", uiReadId);
+}
+

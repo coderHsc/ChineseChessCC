@@ -22,9 +22,15 @@ public:
 	static GameScene* getGameScene();
 
 private:
+	void getNetIdFromServer();
+	void receiveNetIdFromServer(cocos2d::extension::CCHttpClient* client, cocos2d::extension::CCHttpResponse* response);
+
 	void sendMoveToServer(UINT uiChessId, UINT uiPosX, UINT uiPosY);
 	void receiveMoveFromServerTimerBack(float dt);
 	void receiveMoveFromServer(cocos2d::extension::CCHttpClient* client, cocos2d::extension::CCHttpResponse* response);
+
+	UINT uiNetId;
+	bool bCanMove;
 };
 
 #endif // __GAME_SCENENET_H__
