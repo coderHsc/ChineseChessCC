@@ -18,8 +18,6 @@ GameMenu::~GameMenu()
 
 bool GameMenu::init(void)
 {
-    CCSize size = CCDirector::sharedDirector()->getWinSize();
-
     CCMenu* pItemMenu = CCMenu::create();
     
     CCLabelTTF* label = CCLabelTTF::create("start", "Arial", 48);
@@ -67,9 +65,6 @@ CCScene* GameMenu::scene(void)
 
 void GameMenu::menuNormalGameCallback(CCObject* pSender)
 {
-    // get the userdata, it's the index of the menu item clicked
-    CCMenuItem* pMenuItem = (CCMenuItem *)(pSender);
-
     // create the test scene and run it
     CCDirector::sharedDirector()->replaceScene(GameScene::scene());
 

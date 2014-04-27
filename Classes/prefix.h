@@ -9,7 +9,7 @@
 #ifndef __chinese_chess__prefix__
 #define __chinese_chess__prefix__
 
-#define uint unsigned int
+typedef	unsigned int		uint;
 
 #include <iostream>
 

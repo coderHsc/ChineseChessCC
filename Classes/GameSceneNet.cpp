@@ -8,7 +8,7 @@ USING_NS_CC;
 USING_NS_CC_EXT;
 
 GameSceneNet::GameSceneNet()
-:uiNetId(0), bCanMove(false)
+:uiNetId(0), bCanMove(false), pTipsLabel(NULL)
 {
 }
 
@@ -45,6 +45,7 @@ bool GameSceneNet::checkChessMoveIsValid(UINT uiChessId, UINT uiPosY, UINT uiPos
 {
     if (false == this->bCanMove)
     {
+        CCLog("Can't move chess");
         return false;
     }
 
@@ -65,7 +66,7 @@ void GameSceneNet::moveChess(UINT uiChessId, UINT uiPosY, UINT uiPosX)
 void GameSceneNet::sendMoveToServer(UINT uiChessId, UINT uiPosY, UINT uiPosX)
 {
 	CCHttpRequest* request = new CCHttpRequest();
-	request->setUrl("http://192.168.1.176:9090/chessMove");
+	request->setUrl("http://localhost:9090/chessMove");
 	request->setRequestType(CCHttpRequest::kHttpPost);
 
 	char aucBuf[256] = { 0 };
@@ -81,7 +82,7 @@ void GameSceneNet::receiveMoveFromServerTimerBack(float dt)
 {
 	CCLog("timer %f", dt);
 	CCHttpRequest* request = new CCHttpRequest();
-	request->setUrl("http://192.168.1.176:9090/chessMoveGet");
+	request->setUrl("http://localhost:9090/chessMoveGet");
 	request->setRequestType(CCHttpRequest::kHttpGet);
 	request->setResponseCallback(this, httpresponse_selector(GameSceneNet::receiveMoveFromServer));
 	request->setTag("GET chess move");
@@ -102,21 +103,29 @@ void GameSceneNet::receiveMoveFromServer(CCHttpClient* client, CCHttpResponse* r
 
 	std::vector<char> *buffer = response->getResponseData();
 	std::string strBuff(buffer->begin(), buffer->end());
-	CCLog(strBuff.c_str());
+	CCLog("%s", strBuff.c_str());
 }
 
 void GameSceneNet::getNetIdFromServer()
 {
 	CCHttpRequest* request = new CCHttpRequest();
-	request->setUrl("http://192.168.1.176:9090/newIdGet");
+	request->setUrl("http://localhost:9090/newIdGet");
 	request->setRequestType(CCHttpRequest::kHttpGet);
 	request->setResponseCallback(this, httpresponse_selector(GameSceneNet::receiveNetIdFromServer));
 	request->setTag("GET net id");
 	CCHttpClient::getInstance()->send(request);
 	request->release();
+    
+    CCLog("request a net id from server");
+    
+    pTipsLabel = CCLabelTTF::create("getting net id", "Arial", 30);
+    this->addChild(pTipsLabel);
+    pTipsLabel->setPosition(ccp(480, 320));
 }
+
 void GameSceneNet::receiveNetIdFromServer(CCHttpClient* client, CCHttpResponse* response)
 {
+    //检查响应是否成功
 	if (!response->isSucceed())
 	{
 		CCLog("response failed in receiveNetIdFromServer");
@@ -124,6 +133,7 @@ void GameSceneNet::receiveNetIdFromServer(CCHttpClient* client, CCHttpResponse* 
 		return;
 	}
 
+    //读取响应
 	std::vector<char> *buffer = response->getResponseData();
 	std::string strBuff(buffer->begin(), buffer->end());
 	
@@ -136,7 +146,30 @@ void GameSceneNet::receiveNetIdFromServer(CCHttpClient* client, CCHttpResponse* 
 		exit(0);
 	}
 
+    //记录分配的NETID
 	this->uiNetId = uiReadId;
 	CCLog("get net id %d", uiReadId);
+    
+    //替换网络信息标签
+    CCString* pStr = CCString::createWithFormat("get net id %d", uiReadId);
+    pTipsLabel->setString(pStr->getCString());
+    pTipsLabel->setColor(ccYELLOW);
+    
+    //允许移动操作
+    bCanMove = true;
+    
+    CCLog("request a net id from server");
+    
+    //请求分配对手
+    CCHttpRequest* request = new CCHttpRequest();
+	request->setUrl("http://localhost:9090/findOpponent");
+	request->setRequestType(CCHttpRequest::kHttpPost);
+	request->setResponseCallback(this, httpresponse_selector(GameSceneNet::receiveMoveFromServer));
+	char aucBuf[256] = { 0 };
+	sprintf(aucBuf, "uiChessId=%d", uiNetId);
+	request->setRequestData(aucBuf, strlen(aucBuf) + 1);
+    request->setTag("Find opponent");
+	CCHttpClient::getInstance()->send(request);
+	request->release();
 }
 

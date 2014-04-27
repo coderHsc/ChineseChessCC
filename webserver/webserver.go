@@ -50,30 +50,54 @@ func netChessMove(w http.ResponseWriter, r *http.Request) {
 }
 
 type BackData struct {
-	ifirst int32
+	ifirst  int32
 	iSecond int32
-	iThird int32
+	iThird  int32
 }
 
 func netChessMoveGet(w http.ResponseWriter, r *http.Request) {
-	PrintRequest(r)
+	//PrintRequest(r)
 
 	stBack := BackData{1, int32(back), 1}
 	fmt.Fprintf(w, "%v", stBack)
 }
 
+type UserMoveRecord struct {
+	iChessId int32
+	iPosX    int32
+	iPosY    int32
+}
+
+type UserData struct {
+	iUserNetId     int
+	iOpponentNetId int
+	slMoveRecord   []UserMoveRecord
+}
+
+var mUser map[int]UserData
+
 func netNewIdGet(w http.ResponseWriter, r *http.Request) {
-	PrintRequest(r)
+	//PrintRequest(r)
 
 	back += 1
-	fmt.Fprintf(w, "%d",  back)
+	fmt.Fprintf(w, "%d", back)
+
+	var tmp []UserMoveRecord
+	mUser[back] = UserData{back, 0, tmp}
+}
+
+func netFindOpponent(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	fmt.Println("post net id", r.Form["uiChessId"])
 }
 
 func main() {
+	mUser = make(map[int]UserData)
 	http.HandleFunc("/pretestPrintRequest", pretestPrintRequest)
 	http.HandleFunc("/chessMove", netChessMove)
 	http.HandleFunc("/chessMoveGet", netChessMoveGet)
 	http.HandleFunc("/newIdGet", netNewIdGet)
+	http.HandleFunc("/findOpponent", netFindOpponent)
 	err := http.ListenAndServe(":9090", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)

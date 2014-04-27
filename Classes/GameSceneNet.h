@@ -31,6 +31,7 @@ private:
 
 	UINT uiNetId;
 	bool bCanMove;
+    cocos2d::CCLabelTTF *pTipsLabel;
 };
 
 #endif // __GAME_SCENENET_H__
