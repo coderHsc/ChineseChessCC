@@ -21,13 +21,20 @@ public:
     static GameScene* getGameScene();
 	static GameScene* pGameScene;
 
+    virtual void setGameWin(void);
+
+    UINT uiLastMoveColor;
+
 private:
 	void CreateChesses(void);
 
 	void resetChessGame();
+
+    void menuCloseGame(CCObject* pSender);
 	
 	ChessGame* pChessGame;
-    UINT uiLastMoveColor;
 };
+
+#define CHESS_TAG_BASE  100
 
 #endif // __GAME_SCENE_H__

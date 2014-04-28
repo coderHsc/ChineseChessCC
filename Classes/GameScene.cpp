@@ -4,8 +4,6 @@
 
 USING_NS_CC;
 
-#define CHESS_TAG_BASE  100
-
 GameScene* GameScene::pGameScene = NULL;
 
 GameScene::GameScene()
@@ -75,6 +73,13 @@ bool GameScene::init(void)
 
     pChessGame = new ChessGame();
     CreateChesses();
+
+    CCMenu* pItemMenu = CCMenu::create();
+    CCLabelTTF* labelClose = CCLabelTTF::create("close game", "Arial", 20);
+    CCMenuItemLabel* pMenuClose = CCMenuItemLabel::create(labelClose, this, menu_selector(GameScene::menuCloseGame));
+    pItemMenu->addChild(pMenuClose);
+    pItemMenu->setPosition(60, 15);
+    this->addChild(pItemMenu);
 
     return true;
 }
@@ -160,8 +165,29 @@ void GameScene::moveChess(UINT uiChessId, UINT uiPosY, UINT uiPosX)
 
     if (CHESSTYPE_KING == pChessGame->GetChessType(uiTargetId))
     {
-        CCDirector::sharedDirector()->replaceScene(GameMenu::scene());
+        this->setGameWin();
     }
 
     return;
+}
+
+void GameScene::setGameWin(void)
+{
+    char* pstr = NULL;
+    if (CHESSCOCLOR_BLACK == pChessGame->GetChessColor(uiLastMoveColor))
+    {
+        pstr = "Black Win !!!";
+    }
+    else
+    {
+        pstr = "Red Win !!!";
+    }
+    CCLabelTTF* pWinLabel = CCLabelTTF::create(pstr, "Arial", 100);
+    this->addChild(pWinLabel);
+    pWinLabel->setPosition(ccp(480, 320));
+}
+
+void GameScene::menuCloseGame(CCObject* pSender)
+{
+    CCDirector::sharedDirector()->replaceScene(GameMenu::scene());
 }

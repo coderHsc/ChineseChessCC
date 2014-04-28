@@ -21,15 +21,24 @@ public:
 	virtual void moveChess(UINT uiChessId, UINT uiPosX, UINT uiPosY);
 	static GameScene* getGameScene();
 
+    virtual void setGameWin(void);
+
 private:
-	void getNetIdFromServer();
+    void moveChessSelf(UINT uiChessId, UINT uiPosX, UINT uiPosY);
+
+	void getNetIdFromServer(void);
 	void receiveNetIdFromServer(cocos2d::extension::CCHttpClient* client, cocos2d::extension::CCHttpResponse* response);
+    void getOppenetIdFromServer(float dt);
+    void receiveOpponentIdFromServer(cocos2d::extension::CCHttpClient* client, cocos2d::extension::CCHttpResponse* response);
+    void sendLeaveGameToServer(void);
 
 	void sendMoveToServer(UINT uiChessId, UINT uiPosX, UINT uiPosY);
 	void receiveMoveFromServerTimerBack(float dt);
 	void receiveMoveFromServer(cocos2d::extension::CCHttpClient* client, cocos2d::extension::CCHttpResponse* response);
 
 	UINT uiNetId;
+    UINT uiLocalColor;
+    UINT uiOpponentId;
 	bool bCanMove;
     cocos2d::CCLabelTTF *pTipsLabel;
 };

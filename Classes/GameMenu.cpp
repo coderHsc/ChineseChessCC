@@ -33,8 +33,8 @@ bool GameMenu::init(void)
 	CCMenuItemLabel* pMenuItemLanTest = CCMenuItemLabel::create(labelLan, this, menu_selector(GameMenu::menuNetGameCallback));
 
     pItemMenu->addChild(pMenuItem);
-	pItemMenu->addChild(pMenuItemNetTest);
-	pItemMenu->addChild(pMenuItemNetPostTest);
+	//pItemMenu->addChild(pMenuItemNetTest);
+	//pItemMenu->addChild(pMenuItemNetPostTest);
 	pItemMenu->addChild(pMenuItemLanTest);
 	pMenuItem->setPosition(ccp(0, 0));
 	pMenuItemNetTest->setPosition(ccp(0, 80));
@@ -109,7 +109,7 @@ void GameMenu::onMenuPostTestClicked(CCObject* pSender)
 	//request->setResponseCallback(this, httpresponse_selector(HttpClientTest::onHttpRequestCompleted));
 
 	// write the post data
-	char postData[22] = "binary=hello\0\0cocos2d";
+	char postData[22] = "uiChessId=22";
 	request->setRequestData(postData, 22);
 
 	request->setTag("POST test1");
