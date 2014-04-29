@@ -7,7 +7,7 @@ USING_NS_CC;
 GameScene* GameScene::pGameScene = NULL;
 
 GameScene::GameScene()
-:pChessGame(NULL), uiLastMoveColor(CHESSCOCLOR_MIN)
+:pChessGame(NULL), uiLastMoveColor(CHESSCOCLOR_MIN), pInfoGround(NULL), uiTrashNum(0)
 {
 }
 
@@ -68,7 +68,7 @@ bool GameScene::init(void)
     CCSize size = CCDirector::sharedDirector()->getWinSize();
 
     CCSprite *GameGround = CCSprite::create("ChessBackground2.png");
-    GameGround->setPosition(ccp(size.width * 0.5, size.height * 0.5));
+    GameGround->setPosition(ccp(GameGround->getContentSize().width * 0.5, size.height * 0.5));
     this->addChild(GameGround, 0);
 
     pChessGame = new ChessGame();
@@ -81,6 +81,15 @@ bool GameScene::init(void)
     pItemMenu->setPosition(60, 15);
     this->addChild(pItemMenu);
 
+    pInfoGround = CCSprite::create("InfoBackground.png");
+    pInfoGround->setPosition(ccp(GameGround->getContentSize().width + pInfoGround->getContentSize().width * 0.5, size.height * 0.5));
+    this->addChild(pInfoGround, 0);
+
+    pTurnLabel = CCLabelTTF::create("Now turn BLACK", "Gill Sans Ultra Bold", 20);
+    pTurnLabel->setColor(ccBLACK);
+    pInfoGround->addChild(pTurnLabel);
+    pTurnLabel->setPosition(ccp(pInfoGround->getContentSize().width * 0.5, pInfoGround->getContentSize().height - 30));
+    
     return true;
 }
 
@@ -112,7 +121,7 @@ void GameScene::CreateChesses(void)
             }
 			UINT uiId = pChessGame->GetChessID(uiLine, uiIndex);
 			ChessSprite *pChess = ChessSprite::createWithTexture(pSpriteText, arrayChessImageText[uiId]);
-			CCPoint point = ccp(-20 + 100 * uiIndex, -10 + 60 * uiLine);
+			CCPoint point = ccp(-12 + 60 * uiIndex, -10 + 60 * uiLine);
             point.y = fHeight - point.y;
             pChess->setPosition(point);
             pChess->setChessId(uiId);
@@ -155,7 +164,8 @@ void GameScene::moveChess(UINT uiChessId, UINT uiPosY, UINT uiPosX)
     UINT uiTargetId = pChessGame->GetChessID(uiPosX, uiPosY);
     if (0 != uiTargetId)
     {
-        this->removeChildByTag(CHESS_TAG_BASE + uiTargetId);
+        this->moveChessToTrash(uiTargetId);
+
         pChessGame->SetChessPos(uiTargetId, 0, 0);
         pChessGame->SetChessAlive(uiTargetId, false);
     }
@@ -163,12 +173,37 @@ void GameScene::moveChess(UINT uiChessId, UINT uiPosY, UINT uiPosX)
     pChessGame->SetChessPos(uiChessId, uiPosX, uiPosY);
     uiLastMoveColor = pChessGame->GetChessColor(uiChessId);
 
+    if (CHESSCOCLOR_BLACK == uiLastMoveColor)
+    {
+        this->setTurnLabel("Now turn RED", ccRED);
+    }
+    else
+    {
+        this->setTurnLabel("Now turn BLACK", ccBLACK);
+    }
+    
+
     if (CHESSTYPE_KING == pChessGame->GetChessType(uiTargetId))
     {
         this->setGameWin();
     }
 
     return;
+}
+
+void GameScene::moveChessToTrash(UINT uiChessId)
+{
+    auto pChess = this->getChildByTag(CHESS_TAG_BASE + uiChessId);
+    pChess->removeFromParent();
+    pInfoGround->addChild(pChess);
+
+    UINT uiIndex = uiTrashNum / 4;
+    UINT uiJndex = uiTrashNum % 4;
+    pChess->setPosition(ccp(52 * uiJndex + 35, 52 * uiIndex + 45));
+
+    pChess->setRotation(20 * CCRANDOM_MINUS1_1());
+
+    uiTrashNum += 1;
 }
 
 void GameScene::setGameWin(void)
@@ -182,12 +217,31 @@ void GameScene::setGameWin(void)
     {
         pstr = "Red Win !!!";
     }
-    CCLabelTTF* pWinLabel = CCLabelTTF::create(pstr, "Arial", 100);
-    this->addChild(pWinLabel);
-    pWinLabel->setPosition(ccp(480, 320));
+    this->setTurnLabel(pstr, ccYELLOW);
 }
 
 void GameScene::menuCloseGame(CCObject* pSender)
 {
     CCDirector::sharedDirector()->replaceScene(GameMenu::scene());
+}
+
+UINT GameScene::getChessColor(UINT uiChessId)
+{
+    return pChessGame->GetChessColor(uiChessId);
+}
+
+void GameScene::setTurnLabel(const char* pstr, const ccColor3B& color)
+{
+    pTurnLabel->setString(pstr);
+    pTurnLabel->setColor(color);
+}
+
+void GameScene::setLastMoveColor(UINT uiChessColor)
+{
+    uiLastMoveColor = uiChessColor;
+}
+
+UINT GameScene::getLastMoveColor(void)
+{
+    return uiLastMoveColor;
 }

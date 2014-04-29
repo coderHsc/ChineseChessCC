@@ -54,8 +54,8 @@ bool ChessSprite::ccTouchBegan(cocos2d::CCTouch* touch, cocos2d::CCEvent* event)
 
     if (true == ret)
     {
-        CCActionInterval* actionTo = CCRotateTo::create(0.01f, 5);
-        CCActionInterval* actionBack = CCRotateTo::create(0.01f, -5);
+        CCActionInterval* actionTo = CCRotateTo::create(0.02f, 10);
+        CCActionInterval* actionBack = CCRotateTo::create(0.02f, -10);
         CCAction* actionRep = CCRepeatForever::create((CCActionInterval*)CCSequence::create(actionTo, actionBack, NULL));
         this->runAction(actionRep);
         position = getPosition();
@@ -81,7 +81,7 @@ void ChessSprite::ccTouchEnded(CCTouch* touch, CCEvent* event)
     point.y = CCEGLView::sharedOpenGLView()->getFrameSize().height - point.y;
 
     //计算落点的坐标
-    UINT uiX = (point.x - 30.0) / 100.0 + 1;
+    UINT uiX = (point.x - 18.0) / 60.0 + 1;
     UINT uiY = (point.y - 20.0) / 60.0 + 1;
     CCLog("%d %d", uiX, uiY);
 
@@ -94,7 +94,7 @@ void ChessSprite::ccTouchEnded(CCTouch* touch, CCEvent* event)
 
     //检查落点的匹配区间
     CCPoint toPoint;
-    toPoint.x = (uiX - 1) * 100 + 80;
+    toPoint.x = (uiX - 1) * 60 + 48;
     toPoint.y = (uiY - 1) * 60 + 50;
     CCLog("%f %f", toPoint.x, toPoint.y);
     CCLog("%f %f", point.x, point.y);

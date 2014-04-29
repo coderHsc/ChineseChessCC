@@ -24,6 +24,8 @@ public:
     virtual void setGameWin(void);
 
 private:
+    void setNetLabel(const char* pstr, const cocos2d::ccColor3B& color);
+
     void moveChessSelf(UINT uiChessId, UINT uiPosX, UINT uiPosY);
 
 	void getNetIdFromServer(void);
@@ -40,7 +42,7 @@ private:
     UINT uiLocalColor;
     UINT uiOpponentId;
 	bool bCanMove;
-    cocos2d::CCLabelTTF *pTipsLabel;
+    cocos2d::CCLabelTTF *pNetLabel;
 };
 
 #endif // __GAME_SCENENET_H__

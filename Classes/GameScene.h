@@ -23,16 +23,27 @@ public:
 
     virtual void setGameWin(void);
 
-    UINT uiLastMoveColor;
+    UINT getChessColor(UINT uiChessId);
+    UINT getLastMoveColor(void);
+
+protected:
+    void setLastMoveColor(UINT uiChessColor);
+
+    cocos2d::CCSprite *pInfoGround;
 
 private:
 	void CreateChesses(void);
-
 	void resetChessGame();
 
     void menuCloseGame(CCObject* pSender);
-	
+
+    void moveChessToTrash(UINT uiChessId);
+    void setTurnLabel(const char* pstr, const cocos2d::ccColor3B& color);
+
 	ChessGame* pChessGame;
+    cocos2d::CCLabelTTF* pTurnLabel;
+    UINT uiLastMoveColor;
+    UINT uiTrashNum;
 };
 
 #define CHESS_TAG_BASE  100

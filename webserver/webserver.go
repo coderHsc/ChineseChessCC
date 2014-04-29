@@ -43,7 +43,7 @@ func pretestPrintRequest(w http.ResponseWriter, r *http.Request) {
 	PrintRequest(r)
 }
 
-var back int = 100
+var giNetIdIndex int = 100
 
 func netChessMove(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
@@ -52,8 +52,11 @@ func netChessMove(w http.ResponseWriter, r *http.Request) {
 	var iNetId int = 0
 	fmt.Sscanf(sNetId, "%d", &iNetId)
 
+	log.Println("request:netChessMove userid:", iNetId)
+
 	_, ok := mUser[iNetId]
 	if false == ok {
+		log.Println("userid ", iNetId, " is not exist")
 		return
 	}
 
@@ -63,10 +66,13 @@ func netChessMove(w http.ResponseWriter, r *http.Request) {
 
 	mUser[iNetId].slMoveRecord = append(mUser[iNetId].slMoveRecord, UserMoveRecord{iChessId, iPosX, iPosY})
 	iOpponent := mUser[iNetId].iOpponentNetId
-	mUser[iOpponent].slMoveRecord = append(mUser[iOpponent].slMoveRecord, UserMoveRecord{iChessId, iPosX, iPosY})
-	mUser[iOpponent].bNewMove = true
+	_, ok = mUser[iOpponent]
+	if false != ok {
+		mUser[iOpponent].slMoveRecord = append(mUser[iOpponent].slMoveRecord, UserMoveRecord{iChessId, iPosX, iPosY})
+		mUser[iOpponent].bNewMove = true
+	}
 
-	fmt.Printf("user %d move chess %d to (%d, %d)\n", iNetId, iChessId, iPosX, iPosY)
+	log.Printf("user %d move chess %d to (%d, %d)\n", iNetId, iChessId, iPosX, iPosY)
 }
 
 func netChessMoveGet(w http.ResponseWriter, r *http.Request) {
@@ -76,29 +82,34 @@ func netChessMoveGet(w http.ResponseWriter, r *http.Request) {
 	var iNetId int = 0
 	fmt.Sscanf(sNetId, "%d", &iNetId)
 
+	log.Println("request:netChessMoveGet userid:", iNetId)
 	_, ok := mUser[iNetId]
 	if false == ok {
+		log.Println("userid ", iNetId, " is not exist")
 		return
 	}
 
 	iOpponent := mUser[iNetId].iOpponentNetId
 	if 0 == iOpponent {
+		log.Println("userid ", iNetId, " have no opponent")
 		return
 	}
-	_, ok2 := mUser[iOpponent]
-	if false == ok2 && false == mUser[iNetId].bNewMove {
-		fmt.Fprintf(w, "0-0-0-0")
-		return
+
+	iLive := 1
+	_, ok = mUser[iOpponent]
+	if false == ok {
+		iLive = 0
+		log.Println("userid ", iNetId, " opponent leave game")
 	}
 
 	if false == mUser[iNetId].bNewMove {
-		fmt.Fprintf(w, "1-0-0-0")
+		log.Println("userid ", iNetId, " have no new moveinfo")
+		fmt.Fprintf(w, "%d-0-0-0", iLive)
 	} else {
 		stMoveInfo := mUser[iNetId].slMoveRecord[len(mUser[iNetId].slMoveRecord) - 1]
-		fmt.Fprintf(w, "1-%d-%d-%d", stMoveInfo.iChessId, stMoveInfo.iPosX, stMoveInfo.iPosY)
+		fmt.Fprintf(w, "%d-%d-%d-%d", iLive, stMoveInfo.iChessId, stMoveInfo.iPosX, stMoveInfo.iPosY)
 		mUser[iNetId].bNewMove = false
-		fmt.Println("get opponent move ", stMoveInfo)
-
+		log.Println("userid ", iNetId, " is not get opponent move ", stMoveInfo)
 	}
 }
 
@@ -115,37 +126,41 @@ type UserData struct {
 	slMoveRecord   []UserMoveRecord
 }
 
+func (pstData *UserData) init(iNetId int) {
+	pstData.iUserNetId = iNetId
+	pstData.iOpponentNetId = 0
+	pstData.bNewMove = false
+
+	var tmp []UserMoveRecord
+	pstData.slMoveRecord = tmp
+}
+
 var mUser map[int]*UserData
 
 func netNewIdGet(w http.ResponseWriter, r *http.Request) {
-	//PrintRequest(r)
+	log.Println("request:netNewIdGet")
+	giNetIdIndex += 1
+	fmt.Fprintf(w, "%d", giNetIdIndex)
 
-	back += 1
-	fmt.Fprintf(w, "%d", back)
-
-	var tmp []UserMoveRecord
 	pstData := new(UserData)
-	pstData.iUserNetId = back
-	pstData.iOpponentNetId = 0
-	pstData.bNewMove = false
-	pstData.slMoveRecord = tmp
-	mUser[back] = pstData
+	pstData.init(giNetIdIndex)
+	mUser[giNetIdIndex] = pstData
 
-	fmt.Println("get new id : ", back)
+	log.Println("create new id : ", giNetIdIndex)
 }
 
 func netFindOpponent(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	fmt.Println("get opponent, post net id", r.Form["uiNetId"])
 	var ss string = r.Form["uiNetId"][0]
-
 	var iNetId int = 0
 	fmt.Sscanf(ss, "%d", &iNetId)
+	log.Println("request:netFindOpponent userid:", iNetId)
 
 	var iOpponentId int = 1
 	var iUserColor int = 0
 	_, ok := mUser[iNetId]
 	if false == ok {
+		log.Println("userid ", iNetId, " is not exist")
 		return
 	}
 	if 0 == mUser[iNetId].iOpponentNetId {
@@ -155,17 +170,18 @@ func netFindOpponent(w http.ResponseWriter, r *http.Request) {
 				iUserColor = 1
 				mUser[iNetId].iOpponentNetId = iUser
 				mUser[iUser].iOpponentNetId = iNetId
+
+				log.Println("userid ", iNetId, " choose a opponent ", iUser, "local color ", iUserColor)
 				break
 			}
 		}
 	} else {
 		iOpponentId = mUser[iNetId].iOpponentNetId
 		iUserColor = 2
+		log.Println("userid ", iNetId, " have a opponent ", iOpponentId, "local color ", iUserColor)
 	}
 
 	fmt.Fprintf(w, "opponent=%dcolor=%d", iOpponentId, iUserColor)
-
-	fmt.Println("choose a opponent : ", iOpponentId)
 }
 
 func netLeaveGame(w http.ResponseWriter, r *http.Request) {
@@ -174,17 +190,18 @@ func netLeaveGame(w http.ResponseWriter, r *http.Request) {
 
 	var iNetId int = 0
 	fmt.Sscanf(ss, "%d", &iNetId)
+	log.Println("request:netLeaveGame userid:", iNetId)
 
 	_, ok := mUser[iNetId]
 	if true == ok {
 		delete(mUser, iNetId)
-		fmt.Printf("net id %d leave game\n", iNetId)
+		log.Printf("userid %d leave game\n", iNetId)
 	}
 }
 
 func main() {
 	mUser = make(map[int]*UserData)
-	http.HandleFunc("/pretestPrintRequest", pretestPrintRequest)
+	http.HandleFunc("/", pretestPrintRequest)
 	http.HandleFunc("/chessMove", netChessMove)
 	http.HandleFunc("/chessMoveGet", netChessMoveGet)
 	http.HandleFunc("/newIdGet", netNewIdGet)

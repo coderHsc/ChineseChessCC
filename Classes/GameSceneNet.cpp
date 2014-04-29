@@ -14,7 +14,7 @@ char* apstrColor[3] = {
 };
 
 GameSceneNet::GameSceneNet()
-:uiNetId(0), bCanMove(false), pTipsLabel(NULL), uiOpponentId(0)
+:uiNetId(0), bCanMove(false), pNetLabel(NULL), uiOpponentId(0), uiLocalColor(10000)
 {
 }
 
@@ -34,6 +34,10 @@ bool GameSceneNet::init(void)
     {
         getNetIdFromServer();
     }
+    pNetLabel = CCLabelTTF::create("getting net id", "Gill Sans Ultra Bold", 20);
+    pInfoGround->addChild(pNetLabel);
+    pNetLabel->setPosition(ccp(pInfoGround->getContentSize().width * 0.5, pInfoGround->getContentSize().height - 80));
+
     return true;
 }
 
@@ -56,7 +60,7 @@ GameScene* GameSceneNet::getGameScene()
 
 bool GameSceneNet::checkChessMoveIsValid(UINT uiChessId, UINT uiPosY, UINT uiPosX)
 {
-    if (false == this->bCanMove)
+    if ((false == this->bCanMove) || (uiLocalColor == this->getLastMoveColor()))
     {
         CCLog("Can't move chess");
         return false;
@@ -69,7 +73,7 @@ bool GameSceneNet::checkChessMoveIsValid(UINT uiChessId, UINT uiPosY, UINT uiPos
 void GameSceneNet::moveChessSelf(UINT uiChessId, UINT uiPosX, UINT uiPosY)
 {
     CCPoint toPoint;
-    toPoint.x = (uiPosX - 1) * 100 + 80;
+    toPoint.x = (uiPosX - 1) * 60 + 48;
     toPoint.y = (uiPosY - 1) * 60 + 50;
     toPoint.y = CCEGLView::sharedOpenGLView()->getFrameSize().height - toPoint.y;
 
@@ -82,13 +86,8 @@ void GameSceneNet::moveChess(UINT uiChessId, UINT uiPosY, UINT uiPosX)
 	CCLog("GameSceneNet******move chess");
 	sendMoveToServer(uiChessId, uiPosY, uiPosX);
 
-    bCanMove = false;
     GameScene::moveChess(uiChessId, uiPosY, uiPosX);
 
-    //替换网络信息标签
-    CCString* pStr = CCString::createWithFormat("local color %s\nnow turn %s", apstrColor[uiLocalColor], apstrColor[3 - uiLocalColor]);
-    pTipsLabel->setString(pStr->getCString());
-    
     schedule(schedule_selector(GameSceneNet::receiveMoveFromServerTimerBack), 1.0f);
 	return;
 }
@@ -143,26 +142,20 @@ void GameSceneNet::receiveMoveFromServer(CCHttpClient* client, CCHttpResponse* r
     UINT uiReadPosY = 0;
     sscanf(strBuff.c_str(), "%d-%d-%d-%d", &uiLive, &uiReadChess, &uiReadPosX, &uiReadPosY);
 
-    if (0 == uiLive)
+    if (0 != uiReadChess)
     {
-        bCanMove = false;
-        pTipsLabel->setString("Opponent leave game");
-        pTipsLabel->setColor(ccRED);
-        return;
-    }
-
-    if (0 == uiReadChess)
-    {
-        schedule(schedule_selector(GameSceneNet::receiveMoveFromServerTimerBack), 1.0f);
+        GameSceneNet::moveChessSelf(uiReadChess, uiReadPosX, uiReadPosY);
+        GameScene::moveChess(uiReadChess, uiReadPosX, uiReadPosY);
     }
     else
     {
-        bCanMove = true;
-        GameSceneNet::moveChessSelf(uiReadChess, uiReadPosX, uiReadPosY);
-        GameScene::moveChess(uiReadChess, uiReadPosX, uiReadPosY);
+        schedule(schedule_selector(GameSceneNet::receiveMoveFromServerTimerBack), 1.0f);
+    }
 
-        CCString* pStr = CCString::createWithFormat("local color %s\nnow turn %s", apstrColor[uiLocalColor], apstrColor[uiLocalColor]);
-        pTipsLabel->setString(pStr->getCString());
+    if (0 == uiLive)
+    {
+        bCanMove = false;
+        this->setNetLabel("Opponent\nleave game", ccRED);
         unschedule(schedule_selector(GameSceneNet::receiveMoveFromServerTimerBack));
     }
 }
@@ -175,13 +168,8 @@ void GameSceneNet::getNetIdFromServer(void)
 	request->setResponseCallback(this, httpresponse_selector(GameSceneNet::receiveNetIdFromServer));
 	request->setTag("GET net id");
 	CCHttpClient::getInstance()->send(request);
-	request->release();
     
     CCLog("request a net id from server");
-    
-    pTipsLabel = CCLabelTTF::create("getting net id", "Arial", 12);
-    this->addChild(pTipsLabel);
-    pTipsLabel->setPosition(ccp(480, 320));
 }
 
 void GameSceneNet::receiveNetIdFromServer(CCHttpClient* client, CCHttpResponse* response)
@@ -196,10 +184,10 @@ void GameSceneNet::receiveNetIdFromServer(CCHttpClient* client, CCHttpResponse* 
 
     //读取响应
 	std::vector<char> *buffer = response->getResponseData();
-	std::string strBuff(buffer->begin(), buffer->end());
-	
-	UINT uiReadId = 0;
-	sscanf(strBuff.c_str(), "%d", &uiReadId);
+    std::string strBuff(buffer->begin(), buffer->end());
+
+    UINT uiReadId = 0;
+    sscanf(strBuff.c_str(), "%d", &uiReadId);
 
 	if (0 == uiReadId)
 	{
@@ -213,9 +201,9 @@ void GameSceneNet::receiveNetIdFromServer(CCHttpClient* client, CCHttpResponse* 
     
     //替换网络信息标签
     CCString* pStr = CCString::createWithFormat("get net id %d", uiReadId);
-    pTipsLabel->setString(pStr->getCString());
-    pTipsLabel->setColor(ccYELLOW);
-    
+    this->setNetLabel("get net id", ccYELLOW);
+    response->getHttpRequest()->release();
+
     schedule(schedule_selector(GameSceneNet::getOppenetIdFromServer), 1.0f);
 }
 
@@ -269,24 +257,20 @@ void GameSceneNet::receiveOpponentIdFromServer(CCHttpClient* client, CCHttpRespo
         this->uiOpponentId = uiReadId;
         this->uiLocalColor = uiReadColor;
 
-        if (CHESSCOCLOR_BLACK == uiReadColor)
+        if (CHESSCOCLOR_RED == uiReadColor)
         {
-            //允许移动操作
-            bCanMove = true;
-            uiLastMoveColor = CHESSCOCLOR_RED;
-        }
-        else
-        {
-            bCanMove = false;
             schedule(schedule_selector(GameSceneNet::receiveMoveFromServerTimerBack), 1.0f);
         }
+        this->setLastMoveColor(CHESSCOCLOR_RED);
 
         unschedule(schedule_selector(GameSceneNet::getOppenetIdFromServer));
 
+        //允许移动操作
+        bCanMove = true;
+
         //替换网络信息标签
-        CCString* pStr = CCString::createWithFormat("local color %s\nnow turn %s", apstrColor[uiReadColor], apstrColor[1]);
-        pTipsLabel->setString(pStr->getCString());
-        pTipsLabel->setColor(ccYELLOW);
+        CCString* pStr = CCString::createWithFormat("Local color %s", apstrColor[uiReadColor]);
+        this->setNetLabel(pStr->getCString(), ccYELLOW);
     }
 }
 
@@ -311,4 +295,10 @@ void GameSceneNet::setGameWin(void)
     this->bCanMove = false;
     GameScene::setGameWin();
     unschedule(schedule_selector(GameSceneNet::receiveMoveFromServerTimerBack));
+}
+
+void GameSceneNet::setNetLabel(const char* pstr, const cocos2d::ccColor3B& color)
+{
+    pNetLabel->setString(pstr);
+    pNetLabel->setColor(color);
 }
