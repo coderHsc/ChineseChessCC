@@ -4,21 +4,21 @@
 #include "cocos2d.h"
 
 
-class GameMenu : public cocos2d::CCLayer
+class GameMenu : public cocos2d::Layer
 {
 public:
     GameMenu();
     ~GameMenu();
 
-    void menuNormalGameCallback(CCObject* pSender);
-	void onMenuGetTestClicked(CCObject* pSender);
-	void onMenuPostTestClicked(CCObject* pSender);
-	void menuNetGameCallback(CCObject* pSender);
+    void menuNormalGameCallback(Ref* pSender);
+    void onMenuGetTestClicked(Ref* pSender);
+    void onMenuPostTestClicked(Ref* pSender);
+    void menuNetGameCallback(Ref* pSender);
 
-	void menuCloseCallback(CCObject* pSender);
+    void menuCloseCallback(Ref* pSender);
 
     virtual bool init(void);
-    static cocos2d::CCScene* scene(void);
+    static cocos2d::Scene* scene(void);
 
     CREATE_FUNC(GameMenu);
 

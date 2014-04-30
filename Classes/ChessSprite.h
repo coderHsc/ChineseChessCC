@@ -4,26 +4,26 @@
 #include "cocos2d.h"
 
 
-class ChessSprite : public cocos2d::CCSprite , public cocos2d::CCTargetedTouchDelegate
+class ChessSprite : public cocos2d::Sprite
 {
 public:
     ChessSprite();
     ~ChessSprite();
 
     static ChessSprite* create(const char *pszFileName);
-    static ChessSprite* createWithTexture(cocos2d::CCTexture2D *pTexture, const cocos2d::CCRect& rect);
+    static ChessSprite* createWithTexture(cocos2d::Texture2D *pTexture, const cocos2d::Rect& rect);
     virtual void onEnter(void);
     virtual void onExit(void);
 
-    virtual bool ccTouchBegan(cocos2d::CCTouch* touch, cocos2d::CCEvent* event);
-    virtual void ccTouchMoved(cocos2d::CCTouch* touch, cocos2d::CCEvent* event);
-    virtual void ccTouchEnded(cocos2d::CCTouch* touch, cocos2d::CCEvent* event);
+    virtual bool onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* event);
+    virtual void onTouchMoved(cocos2d::Touch* touch, cocos2d::Event* event);
+    virtual void onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event);
 
     void setChessId(UINT uiChessId);
-    UINT uiChessId;
 
 private:
-    cocos2d::CCPoint position;
+    UINT uiChessId;
+    cocos2d::Point position;
 };
 
 #endif // __CHESSSPRITE_H__

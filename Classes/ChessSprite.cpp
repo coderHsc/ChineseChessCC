@@ -22,7 +22,7 @@ ChessSprite* ChessSprite::create(const char *pszFileName)
     return pChess;
 }
 
-ChessSprite* ChessSprite::createWithTexture(CCTexture2D *pTexture, const CCRect& rect)
+ChessSprite* ChessSprite::createWithTexture(Texture2D *pTexture, const Rect& rect)
 {
     ChessSprite *pChess = new ChessSprite();
     pChess->initWithTexture(pTexture, rect);
@@ -33,88 +33,96 @@ ChessSprite* ChessSprite::createWithTexture(CCTexture2D *pTexture, const CCRect&
 
 void ChessSprite::onEnter(void)
 {
-    CCDirector::sharedDirector()->getTouchDispatcher()->addTargetedDelegate(this, 0, true);
-    CCSprite::onEnter();
+    Sprite::onEnter();
+
+    auto listener = EventListenerTouchOneByOne::create();
+    listener->setSwallowTouches(true);
+
+    listener->onTouchBegan = CC_CALLBACK_2(ChessSprite::onTouchBegan, this);
+    listener->onTouchMoved = CC_CALLBACK_2(ChessSprite::onTouchMoved, this);
+    listener->onTouchEnded = CC_CALLBACK_2(ChessSprite::onTouchEnded, this);
+
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
 
     return;
 }
 
 void ChessSprite::onExit(void)
 {
-    CCDirector::sharedDirector()->getTouchDispatcher()->removeDelegate(this);
-    CCSprite::onExit();
+    Sprite::onExit();
 
     return;
 }
 
-bool ChessSprite::ccTouchBegan(cocos2d::CCTouch* touch, cocos2d::CCEvent* event)
+bool ChessSprite::onTouchBegan(Touch* touch, Event* event)
 {
-    CCPoint point = convertTouchToNodeSpaceAR(touch);
-	bool ret = CCRectMake(-25, -25, 50, 50).containsPoint(point);
+    Point point = this->convertTouchToNodeSpaceAR(touch);
+    auto s = this->getContentSize();
+    bool ret = Rect(-s.width / 2, -s.height / 2, s.width, s.height).containsPoint(point);
 
     if (true == ret)
     {
-        CCActionInterval* actionTo = CCRotateTo::create(0.02f, 10);
-        CCActionInterval* actionBack = CCRotateTo::create(0.02f, -10);
-        CCAction* actionRep = CCRepeatForever::create((CCActionInterval*)CCSequence::create(actionTo, actionBack, NULL));
+        auto* actionTo = RotateTo::create(0.02f, 10);
+        auto* actionBack = RotateTo::create(0.02f, -10);
+        auto* actionRep = RepeatForever::create(Sequence::create(actionTo, actionBack, NULL));
         this->runAction(actionRep);
-        position = getPosition();
-        CCLog("%d, %f", this->getZOrder(), this->getVertexZ());
+        this->position = getPosition();
+        log("chess z order %d, vertex.z %f", this->getZOrder(), this->getVertexZ());
         this->setZOrder(2000);
     }
     return ret;
 }
 
-void ChessSprite::ccTouchMoved(CCTouch* touch, CCEvent* event)
+void ChessSprite::onTouchMoved(Touch* touch, Event* event)
 {
-    setPosition(ccp(touch->getLocation().x, touch->getLocation().y));
+    this->setPosition(touch->getLocation().x, touch->getLocation().y);
 
     return;
 }
 
-void ChessSprite::ccTouchEnded(CCTouch* touch, CCEvent* event)
+void ChessSprite::onTouchEnded(Touch* touch, Event* event)
 {
     this->stopAllActions();
     this->setZOrder(1);
     //将touch坐标初始化为屏幕坐标系
-    CCPoint point = touch->getLocation();
-    point.y = CCEGLView::sharedOpenGLView()->getFrameSize().height - point.y;
+    Point point = touch->getLocation();
+    point.y = Director::getInstance()->getOpenGLView()->getFrameSize().height - point.y;
 
     //计算落点的坐标
     UINT uiX = (point.x - 18.0) / 60.0 + 1;
     UINT uiY = (point.y - 20.0) / 60.0 + 1;
-    CCLog("%d %d", uiX, uiY);
+    log("compute chess target %d %d", uiX, uiY);
 
     //判断落点合法性
     if ((0 == uiX) || (0 == uiY) || (9 < uiX) || (10 < uiY))
     {
-        setPosition(position);
+        this->setPosition(this->position);
         return;
     }
 
     //检查落点的匹配区间
-    CCPoint toPoint;
+    Point toPoint;
     toPoint.x = (uiX - 1) * 60 + 48;
     toPoint.y = (uiY - 1) * 60 + 50;
-    CCLog("%f %f", toPoint.x, toPoint.y);
-    CCLog("%f %f", point.x, point.y);
+    log("target point %f %f", toPoint.x, toPoint.y);
+    log("touch point %f %f", point.x, point.y);
     if (15.0 < toPoint.getDistance(point))
     {
-        setPosition(position);
+        this->setPosition(this->position);
         return;
     }
 
     //判断落子是否符合游戏规则
     if (false == GameScene::getGameScene()->checkChessMoveIsValid(uiChessId, uiX, uiY))
     {
-        CCLog("chess moving is unfit for game, chess id :%d, move (%d, %d)", uiChessId, uiX, uiY);
-        setPosition(position);
+        log("chess moving is unfit for game, chess id :%d, move (%d, %d)", uiChessId, uiX, uiY);
+        this->setPosition(this->position);
         return;
     }
 
     //可以落子
-    toPoint.y = CCEGLView::sharedOpenGLView()->getFrameSize().height - toPoint.y;
-    setPosition(toPoint);
+    toPoint.y = Director::getInstance()->getOpenGLView()->getFrameSize().height - toPoint.y;
+    this->setPosition(toPoint);
 
     //由棋局进行局面处理
     GameScene::getGameScene()->moveChess(uiChessId, uiX, uiY);
@@ -124,5 +132,5 @@ void ChessSprite::ccTouchEnded(CCTouch* touch, CCEvent* event)
 
 void ChessSprite::setChessId(UINT uiId)
 {
-    uiChessId = uiId;
+    this->uiChessId = uiId;
 }

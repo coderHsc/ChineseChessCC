@@ -1,11 +1,10 @@
 #include "GameMenu.h"
 #include "GameScene.h"
 #include "GameSceneNet.h"
-
-#include "cocos-ext.h"
+#include "HttpClient.h"
 
 USING_NS_CC;
-USING_NS_CC_EXT;
+using namespace cocos2d::network;
 
 GameMenu::GameMenu()
 {
@@ -18,19 +17,19 @@ GameMenu::~GameMenu()
 
 bool GameMenu::init(void)
 {
-    CCMenu* pItemMenu = CCMenu::create();
+    Menu* pItemMenu = Menu::create();
     
-    CCLabelTTF* label = CCLabelTTF::create("start", "Arial", 48);
-	CCMenuItemLabel* pMenuItem = CCMenuItemLabel::create(label, this, menu_selector(GameMenu::menuNormalGameCallback));
+    LabelTTF* label = LabelTTF::create("start", "Arial", 48);
+    MenuItemLabel* pMenuItem = MenuItemLabel::create(label, CC_CALLBACK_1(GameMenu::menuNormalGameCallback, this));
 
-	CCLabelTTF* labelNet = CCLabelTTF::create("netTest", "Arial", 48);
-	CCMenuItemLabel* pMenuItemNetTest = CCMenuItemLabel::create(labelNet, this, menu_selector(GameMenu::onMenuGetTestClicked));
+	LabelTTF* labelNet = LabelTTF::create("netTest", "Arial", 48);
+    MenuItemLabel* pMenuItemNetTest = MenuItemLabel::create(labelNet, CC_CALLBACK_1(GameMenu::onMenuGetTestClicked, this));
 
-	CCLabelTTF* labelNetPost = CCLabelTTF::create("netPostTest", "Arial", 48);
-	CCMenuItemLabel* pMenuItemNetPostTest = CCMenuItemLabel::create(labelNetPost, this, menu_selector(GameMenu::onMenuPostTestClicked));
+	LabelTTF* labelNetPost = LabelTTF::create("netPostTest", "Arial", 48);
+    MenuItemLabel* pMenuItemNetPostTest = MenuItemLabel::create(labelNetPost, CC_CALLBACK_1(GameMenu::onMenuPostTestClicked, this));
 
-	CCLabelTTF* labelLan = CCLabelTTF::create("NetGame", "Arial", 48);
-	CCMenuItemLabel* pMenuItemLanTest = CCMenuItemLabel::create(labelLan, this, menu_selector(GameMenu::menuNetGameCallback));
+	LabelTTF* labelLan = LabelTTF::create("NetGame", "Arial", 48);
+    MenuItemLabel* pMenuItemLanTest = MenuItemLabel::create(labelLan, CC_CALLBACK_1(GameMenu::menuNetGameCallback, this));
 
     pItemMenu->addChild(pMenuItem);
 	//pItemMenu->addChild(pMenuItemNetTest);
@@ -43,18 +42,18 @@ bool GameMenu::init(void)
 
     this->addChild(pItemMenu);
 
-    CCMenuItemImage *pCloseItem = CCMenuItemImage::create("CloseNormal.png", "CloseSelected.png", this,
-        menu_selector(GameMenu::menuCloseCallback));
-    CCMenu* pCloseMenu = CCMenu::create(pCloseItem, NULL);
+    MenuItemImage *pCloseItem = MenuItemImage::create("CloseNormal.png", "CloseSelected.png",
+        CC_CALLBACK_1(GameMenu::menuCloseCallback, this));
+    Menu* pCloseMenu = Menu::create(pCloseItem, NULL);
     pCloseMenu->setPositionY(200);
     this->addChild(pCloseMenu);
 
 	return true;
 }
 
-CCScene* GameMenu::scene(void)
+Scene* GameMenu::scene(void)
 {
-    CCScene *scene = CCScene::create();
+    Scene *scene = Scene::create();
 
     GameMenu *layer = GameMenu::create();
 
@@ -63,7 +62,7 @@ CCScene* GameMenu::scene(void)
     return scene;
 }
 
-void GameMenu::menuNormalGameCallback(CCObject* pSender)
+void GameMenu::menuNormalGameCallback(Ref* pSender)
 {
     // create the test scene and run it
     CCDirector::sharedDirector()->replaceScene(GameScene::scene());
@@ -71,48 +70,46 @@ void GameMenu::menuNormalGameCallback(CCObject* pSender)
     return;
 }
 
-void GameMenu::menuNetGameCallback(CCObject* pSender)
+void GameMenu::menuNetGameCallback(Ref* pSender)
 {
 	CCDirector::sharedDirector()->replaceScene(GameSceneNet::scene());
 
 	return;
 }
 
-void GameMenu::menuCloseCallback(CCObject* pSender)
+void GameMenu::menuCloseCallback(Ref* pSender)
 {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WINRT) || (CC_TARGET_PLATFORM == CC_PLATFORM_WP8)
-    CCMessageBox("You pressed the close button. Windows Store Apps do not implement a close button.", "Alert");
+    MessageBox("You pressed the close button. Windows Store Apps do not implement a close button.", "Alert");
 #else
-    CCDirector::sharedDirector()->end();
+    Director::getInstance()->end();
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
     exit(0);
 #endif
 #endif
 }
 
-void GameMenu::onMenuGetTestClicked(CCObject* pSender)
+void GameMenu::onMenuGetTestClicked(Ref* pSender)
 {
-	CCHttpRequest* request = new CCHttpRequest();
+    HttpRequest* request = new HttpRequest();
 	request->setUrl("http://114.215.193.215:9090/pretestPrintRequest");
-	request->setRequestType(CCHttpRequest::kHttpGet);
-	//request->setResponseCallback(this, httpresponse_selector(HttpClientTest::onHttpRequestCompleted));
+    request->setRequestType(HttpRequest::Type::GET);
 	request->setTag("GET test1");
-	CCHttpClient::getInstance()->send(request);
+	HttpClient::getInstance()->send(request);
 	request->release();
 }
 
-void GameMenu::onMenuPostTestClicked(CCObject* pSender)
+void GameMenu::onMenuPostTestClicked(Ref* pSender)
 {
-	CCHttpRequest* request = new CCHttpRequest();
-	request->setUrl("http://114.215.193.215:9090/pretestPrintRequest");
-	request->setRequestType(CCHttpRequest::kHttpPost);
-	//request->setResponseCallback(this, httpresponse_selector(HttpClientTest::onHttpRequestCompleted));
+    HttpRequest* request = new HttpRequest();
+	request->setUrl("http://192.168.1.176:9090/findOpponent");
+    request->setRequestType(HttpRequest::Type::POST);
 
 	// write the post data
 	char postData[22] = "uiChessId=22";
 	request->setRequestData(postData, 22);
 
 	request->setTag("POST test1");
-	CCHttpClient::getInstance()->send(request);
+    HttpClient::getInstance()->send(request);
 	request->release();
 }

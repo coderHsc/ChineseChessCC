@@ -5,14 +5,14 @@
 #include "Chess.h"
 
 
-class GameScene : public cocos2d::CCLayer
+class GameScene : public cocos2d::Layer
 {
 public:
     GameScene();
     ~GameScene();
 
     virtual bool init(void);
-    static cocos2d::CCScene* scene(void);
+    static cocos2d::Scene* scene(void);
 
     CREATE_FUNC(GameScene);
 
@@ -29,21 +29,22 @@ public:
 protected:
     void setLastMoveColor(UINT uiChessColor);
 
-    cocos2d::CCSprite *pInfoGround;
+    cocos2d::Sprite *pInfoGround;
 
 private:
 	void CreateChesses(void);
 	void resetChessGame();
 
-    void menuCloseGame(CCObject* pSender);
+    void menuCloseGame(Ref * pSender);
 
     void moveChessToTrash(UINT uiChessId);
-    void setTurnLabel(const char* pstr, const cocos2d::ccColor3B& color);
+    void setTurnLabel(const char* pstr, const cocos2d::Color3B& color);
 
 	ChessGame* pChessGame;
-    cocos2d::CCLabelTTF* pTurnLabel;
+    cocos2d::LabelTTF* pTurnLabel;
     UINT uiLastMoveColor;
     UINT uiTrashNum;
+    bool bGameStop;
 };
 
 #define CHESS_TAG_BASE  100
