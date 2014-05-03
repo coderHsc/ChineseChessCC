@@ -19,26 +19,26 @@ bool GameMenu::init(void)
 {
     Menu* pItemMenu = Menu::create();
     
-    LabelTTF* label = LabelTTF::create("start", "Arial", 48);
+    auto label = LabelTTF::create("start", "Arial", 48);
     MenuItemLabel* pMenuItem = MenuItemLabel::create(label, CC_CALLBACK_1(GameMenu::menuNormalGameCallback, this));
 
-	LabelTTF* labelNet = LabelTTF::create("netTest", "Arial", 48);
+	auto labelNet = LabelTTF::create("netTest", "Arial", 48);
     MenuItemLabel* pMenuItemNetTest = MenuItemLabel::create(labelNet, CC_CALLBACK_1(GameMenu::onMenuGetTestClicked, this));
 
-	LabelTTF* labelNetPost = LabelTTF::create("netPostTest", "Arial", 48);
+	auto labelNetPost = LabelTTF::create("netPostTest", "Arial", 48);
     MenuItemLabel* pMenuItemNetPostTest = MenuItemLabel::create(labelNetPost, CC_CALLBACK_1(GameMenu::onMenuPostTestClicked, this));
 
-	LabelTTF* labelLan = LabelTTF::create("NetGame", "Arial", 48);
+	auto labelLan = LabelTTF::create("NetGame", "Arial", 48);
     MenuItemLabel* pMenuItemLanTest = MenuItemLabel::create(labelLan, CC_CALLBACK_1(GameMenu::menuNetGameCallback, this));
 
     pItemMenu->addChild(pMenuItem);
 	//pItemMenu->addChild(pMenuItemNetTest);
 	//pItemMenu->addChild(pMenuItemNetPostTest);
 	pItemMenu->addChild(pMenuItemLanTest);
-	pMenuItem->setPosition(ccp(0, 0));
-	pMenuItemNetTest->setPosition(ccp(0, 80));
-	pMenuItemLanTest->setPosition(ccp(0, 160));
-	pMenuItemNetPostTest->setPosition(ccp(0, 240));
+	pMenuItem->setPosition(0, 0);
+	pMenuItemNetTest->setPosition(0, 80);
+	pMenuItemLanTest->setPosition(0, 160);
+	pMenuItemNetPostTest->setPosition(0, 240);
 
     this->addChild(pItemMenu);
 
@@ -65,14 +65,14 @@ Scene* GameMenu::scene(void)
 void GameMenu::menuNormalGameCallback(Ref* pSender)
 {
     // create the test scene and run it
-    CCDirector::sharedDirector()->replaceScene(GameScene::scene());
+    CCDirector::getInstance()->replaceScene(GameScene::scene());
 
     return;
 }
 
 void GameMenu::menuNetGameCallback(Ref* pSender)
 {
-	CCDirector::sharedDirector()->replaceScene(GameSceneNet::scene());
+	CCDirector::getInstance()->replaceScene(GameSceneNet::scene());
 
 	return;
 }

@@ -75,7 +75,7 @@ bool GameScene::init(void)
     CreateChesses();
 
     Menu* pItemMenu = Menu::create();
-    LabelTTF* labelClose = LabelTTF::create("close game", "Arial", 20);
+    auto labelClose = LabelTTF::create("close game", "Arial", 20);
     MenuItemLabel* pMenuClose = MenuItemLabel::create(labelClose, CC_CALLBACK_1(GameScene::menuCloseGame, this));
     pItemMenu->addChild(pMenuClose);
     pItemMenu->setPosition(60, 15);
@@ -109,7 +109,7 @@ void GameScene::CreateChesses(void)
 {
     log("*********CreateChesses****************");
     std::vector<std::vector<UINT> > vecMatrix = this->pChessGame->GetMatrix();
-    auto pSpriteText = TextureCache::getInstance()->addImage("ChessesM.png");
+    auto pSpriteText = Director::getInstance()->getTextureCache()->addImage("ChessesM.png");
     float fHeight = Director::getInstance()->getOpenGLView()->getFrameSize().height;
     for (UINT uiLine = 1; uiLine <= CHESS_DATA_LINES; uiLine++)
     {
@@ -200,7 +200,7 @@ void GameScene::moveChessToTrash(UINT uiChessId)
     auto pChess = this->getChildByTag(CHESS_TAG_BASE + uiChessId);
     pChess->removeFromParent();
 
-    auto pSpriteText = TextureCache::getInstance()->getTextureForKey("ChessesM.png");
+    auto pSpriteText = Director::getInstance()->getTextureCache()->getTextureForKey("ChessesM.png");
     auto pNewChess = ChessSprite::createWithTexture(pSpriteText, arrayChessImageText[uiChessId]);
 
     UINT uiIndex = this->uiTrashNum / 4;
@@ -218,11 +218,11 @@ void GameScene::setGameWin(void)
     char* pstr = NULL;
     if (CHESSCOCLOR_BLACK == this->pChessGame->GetChessColor(uiLastMoveColor))
     {
-        pstr = "Black Win !!!";
+        pstr = (char*)"Black Win !!!";
     }
     else
     {
-        pstr = "Red Win !!!";
+        pstr = (char*)"Red Win !!!";
     }
     this->setTurnLabel(pstr, Color3B::YELLOW);
 

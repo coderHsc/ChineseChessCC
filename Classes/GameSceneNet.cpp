@@ -6,9 +6,9 @@ USING_NS_CC;
 using namespace cocos2d::network;
 
 char* apstrColor[3] = {
-    "invalid",
-    "Black",
-    "Red"
+    (char*)"invalid",
+    (char*)"Black",
+    (char*)"Red"
 };
 
 GameSceneNet::GameSceneNet()
@@ -198,8 +198,8 @@ void GameSceneNet::receiveNetIdFromServer(HttpClient* client, HttpResponse* resp
 	log("get net id %d", uiReadId);
     
     //替换网络信息标签
-    String* pStr = String::createWithFormat("get net id %d", uiReadId);
-    this->setNetLabel("get net id", Color3B::YELLOW);
+    auto pStr = String::createWithFormat("get net id %d", uiReadId);
+    this->setNetLabel(pStr->getCString(), Color3B::YELLOW);
     response->getHttpRequest()->release();
 
     this->schedule(schedule_selector(GameSceneNet::getOppenetIdFromServer), 1.0f);
@@ -267,7 +267,7 @@ void GameSceneNet::receiveOpponentIdFromServer(HttpClient* client, HttpResponse*
         this->bCanMove = true;
 
         //替换网络信息标签
-        String* pStr = String::createWithFormat("Local color %s", apstrColor[uiReadColor]);
+        auto pStr = String::createWithFormat("Local color %s", apstrColor[uiReadColor]);
         this->setNetLabel(pStr->getCString(), Color3B::YELLOW);
     }
 }

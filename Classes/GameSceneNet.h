@@ -41,7 +41,7 @@ private:
     UINT uiLocalColor;
     UINT uiOpponentId;
 	bool bCanMove;
-    cocos2d::LabelTTF *pNetLabel;
+    cocos2d::LabelTTF* pNetLabel;
 };
 
 #endif // __GAME_SCENENET_H__
