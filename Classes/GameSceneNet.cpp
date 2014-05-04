@@ -1,4 +1,4 @@
-#include "GameMenu.h"
+﻿#include "GameMenu.h"
 #include "GameSceneNet.h"
 #include "ChessSprite.h"
 
@@ -32,7 +32,7 @@ bool GameSceneNet::init(void)
     {
         this->getNetIdFromServer();
     }
-    this->pNetLabel = LabelTTF::create("getting net id", "Gill Sans Ultra Bold", 20);
+    this->pNetLabel = Label::createWithTTF("getting net id", "fonts/GILSANUB.ttf", 20);
     this->pInfoGround->addChild(this->pNetLabel);
     this->pNetLabel->setPosition(this->pInfoGround->getContentSize().width * 0.5, this->pInfoGround->getContentSize().height - 80);
 

@@ -1,4 +1,4 @@
-#include "ChessSprite.h"
+﻿#include "ChessSprite.h"
 #include "GameScene.h"
 
 USING_NS_CC;
@@ -67,8 +67,8 @@ bool ChessSprite::onTouchBegan(Touch* touch, Event* event)
         auto* actionRep = RepeatForever::create(Sequence::create(actionTo, actionBack, NULL));
         this->runAction(actionRep);
         this->position = getPosition();
-        log("chess z order %d, vertex.z %f", this->getZOrder(), this->getVertexZ());
-        this->setZOrder(2000);
+        log("chess z order %d, vertex.z %f", this->getLocalZOrder(), this->getPositionZ());
+        this->setLocalZOrder(2000);
     }
     return ret;
 }
@@ -83,7 +83,7 @@ void ChessSprite::onTouchMoved(Touch* touch, Event* event)
 void ChessSprite::onTouchEnded(Touch* touch, Event* event)
 {
     this->stopAllActions();
-    this->setZOrder(1);
+    this->setLocalZOrder(1);
     //将touch坐标初始化为屏幕坐标系
     Point point = touch->getLocation();
     point.y = Director::getInstance()->getOpenGLView()->getFrameSize().height - point.y;

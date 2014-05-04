@@ -1,4 +1,4 @@
-#include "GameMenu.h"
+﻿#include "GameMenu.h"
 #include "GameScene.h"
 #include "ChessSprite.h"
 
@@ -75,7 +75,7 @@ bool GameScene::init(void)
     CreateChesses();
 
     Menu* pItemMenu = Menu::create();
-    auto labelClose = LabelTTF::create("close game", "Arial", 20);
+    auto labelClose = Label::createWithTTF("close game", "fonts/arial.ttf", 20);
     MenuItemLabel* pMenuClose = MenuItemLabel::create(labelClose, CC_CALLBACK_1(GameScene::menuCloseGame, this));
     pItemMenu->addChild(pMenuClose);
     pItemMenu->setPosition(60, 15);
@@ -85,7 +85,7 @@ bool GameScene::init(void)
     this->pInfoGround->setPosition(GameGround->getContentSize().width + this->pInfoGround->getContentSize().width * 0.5, size.height * 0.5);
     this->addChild(pInfoGround, 0);
 
-    this->pTurnLabel = LabelTTF::create("Now turn BLACK", "Gill Sans Ultra Bold", 20);
+    this->pTurnLabel = Label::createWithTTF("Now turn BLACK", "fonts/GILSANUB.ttf", 20);
     this->pTurnLabel->setColor(Color3B::BLACK);
     this->pInfoGround->addChild(this->pTurnLabel);
     this->pTurnLabel->setPosition(this->pInfoGround->getContentSize().width * 0.5, this->pInfoGround->getContentSize().height - 30);

@@ -1,4 +1,4 @@
-#ifndef __CHESSSPRITE_H__
+﻿#ifndef __CHESSSPRITE_H__
 #define __CHESSSPRITE_H__
 
 #include "cocos2d.h"

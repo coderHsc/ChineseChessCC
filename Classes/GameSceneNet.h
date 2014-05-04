@@ -1,4 +1,4 @@
-#ifndef __GAME_SCENENET_H__
+﻿#ifndef __GAME_SCENENET_H__
 #define __GAME_SCENENET_H__
 
 #include "cocos2d.h"
@@ -41,7 +41,7 @@ private:
     UINT uiLocalColor;
     UINT uiOpponentId;
 	bool bCanMove;
-    cocos2d::LabelTTF* pNetLabel;
+    cocos2d::Label* pNetLabel;
 };
 
 #endif // __GAME_SCENENET_H__

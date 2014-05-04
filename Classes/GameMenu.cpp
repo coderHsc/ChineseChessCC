@@ -1,4 +1,4 @@
-#include "GameMenu.h"
+﻿#include "GameMenu.h"
 #include "GameScene.h"
 #include "GameSceneNet.h"
 #include "HttpClient.h"
@@ -19,16 +19,18 @@ bool GameMenu::init(void)
 {
     Menu* pItemMenu = Menu::create();
     
-    auto label = LabelTTF::create("start", "Arial", 48);
+    TTFConfig ttfConfig("fonts/arial.ttf", 48);
+
+    auto label = Label::createWithTTF(ttfConfig, "start");
     MenuItemLabel* pMenuItem = MenuItemLabel::create(label, CC_CALLBACK_1(GameMenu::menuNormalGameCallback, this));
 
-	auto labelNet = LabelTTF::create("netTest", "Arial", 48);
+    auto labelNet = Label::createWithTTF(ttfConfig, "netTest");
     MenuItemLabel* pMenuItemNetTest = MenuItemLabel::create(labelNet, CC_CALLBACK_1(GameMenu::onMenuGetTestClicked, this));
 
-	auto labelNetPost = LabelTTF::create("netPostTest", "Arial", 48);
+    auto labelNetPost = Label::createWithTTF(ttfConfig, "netPostTest");
     MenuItemLabel* pMenuItemNetPostTest = MenuItemLabel::create(labelNetPost, CC_CALLBACK_1(GameMenu::onMenuPostTestClicked, this));
 
-	auto labelLan = LabelTTF::create("NetGame", "Arial", 48);
+    auto labelLan = Label::createWithTTF(ttfConfig, "NetGame");
     MenuItemLabel* pMenuItemLanTest = MenuItemLabel::create(labelLan, CC_CALLBACK_1(GameMenu::menuNetGameCallback, this));
 
     pItemMenu->addChild(pMenuItem);

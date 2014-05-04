@@ -1,4 +1,4 @@
-#include "AppDelegate.h"
+﻿#include "AppDelegate.h"
 #include "GameMenu.h"
 
 USING_NS_CC;

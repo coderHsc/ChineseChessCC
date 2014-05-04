@@ -1,9 +1,9 @@
-//
+﻿//
 //  prefix.h
 //  chinese chess
 //
 //  Created by woodpile on 13-12-20.
-//  Copyright (c) 2013年 woodpile. All rights reserved.
+//  Copyright (c) 2013 woodpile. All rights reserved.
 //
 
 #ifndef __chinese_chess__prefix__

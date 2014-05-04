@@ -1,9 +1,9 @@
-//
+﻿//
 //  chess.h
 //  chinese chess
 //
 //  Created by woodpile on 13-12-25.
-//  Copyright (c) 2013年 woodpile. All rights reserved.
+//  Copyright (c) 2013  woodpile. All rights reserved.
 //
 
 #ifndef __chinese_chess__chess__

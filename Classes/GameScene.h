@@ -1,4 +1,4 @@
-#ifndef __GAME_SCENE_H__
+﻿#ifndef __GAME_SCENE_H__
 #define __GAME_SCENE_H__
 
 #include "cocos2d.h"
@@ -41,7 +41,7 @@ private:
     void setTurnLabel(const char* pstr, const cocos2d::Color3B& color);
 
 	ChessGame* pChessGame;
-    cocos2d::LabelTTF* pTurnLabel;
+    cocos2d::Label* pTurnLabel;
     UINT uiLastMoveColor;
     UINT uiTrashNum;
     bool bGameStop;
