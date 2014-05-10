@@ -89,7 +89,7 @@ bool GameScene::init(void)
     this->pTurnLabel->setColor(Color3B::BLACK);
     this->pInfoGround->addChild(this->pTurnLabel);
     this->pTurnLabel->setPosition(this->pInfoGround->getContentSize().width * 0.5, this->pInfoGround->getContentSize().height - 30);
-    
+
     return true;
 }
 
@@ -185,7 +185,7 @@ void GameScene::moveChess(UINT uiChessId, UINT uiPosY, UINT uiPosX)
     {
         this->setTurnLabel("Now turn BLACK", Color3B::BLACK);
     }
-    
+
 
     if (CHESSTYPE_KING == this->pChessGame->GetChessType(uiTargetId))
     {

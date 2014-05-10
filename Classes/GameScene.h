@@ -31,11 +31,11 @@ protected:
 
     cocos2d::Sprite *pInfoGround;
 
+    void menuCloseGame(Ref * pSender);
+
 private:
 	void CreateChesses(void);
 	void resetChessGame();
-
-    void menuCloseGame(Ref * pSender);
 
     void moveChessToTrash(UINT uiChessId);
     void setTurnLabel(const char* pstr, const cocos2d::Color3B& color);

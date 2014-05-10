@@ -11,6 +11,9 @@ char* apstrColor[3] = {
     (char*)"Red"
 };
 
+std::string strUserName;
+std::string strPasswd;
+
 GameSceneNet::GameSceneNet()
 :uiNetId(0), bCanMove(false), pNetLabel(NULL), uiOpponentId(0), uiLocalColor(10000)
 {
@@ -28,13 +31,16 @@ GameSceneNet::~GameSceneNet()
 bool GameSceneNet::init(void)
 {
 	GameScene::init();
+
+    this->pNetLabel = Label::createWithTTF("getting net id", "fonts/GILSANUB.ttf", 20);
+    this->pInfoGround->addChild(this->pNetLabel);
+    this->pNetLabel->setPosition(this->pInfoGround->getContentSize().width * 0.5, this->pInfoGround->getContentSize().height - 80);
+
+    this->strServerHost = std::string("http://192.168.1.176:9090/");
     if (0 == this->uiNetId)
     {
         this->getNetIdFromServer();
     }
-    this->pNetLabel = Label::createWithTTF("getting net id", "fonts/GILSANUB.ttf", 20);
-    this->pInfoGround->addChild(this->pNetLabel);
-    this->pNetLabel->setPosition(this->pInfoGround->getContentSize().width * 0.5, this->pInfoGround->getContentSize().height - 80);
 
     return true;
 }
@@ -54,6 +60,12 @@ Scene* GameSceneNet::scene(void)
 GameScene* GameSceneNet::getGameScene()
 {
 	return pGameScene;
+}
+
+void GameSceneNet::setLoginInfo(std::string strUser, std::string strPwd)
+{
+    strUserName = strUser;
+    strPasswd = strPwd;
 }
 
 bool GameSceneNet::checkChessMoveIsValid(UINT uiChessId, UINT uiPosY, UINT uiPosX)
@@ -93,7 +105,8 @@ void GameSceneNet::moveChess(UINT uiChessId, UINT uiPosY, UINT uiPosX)
 void GameSceneNet::sendMoveToServer(UINT uiChessId, UINT uiPosY, UINT uiPosX)
 {
 	HttpRequest* request = new HttpRequest();
-	request->setUrl("http://192.168.1.176:9090/chessMove");
+    std::string strHost = this->strServerHost + std::string("chessMove");
+    request->setUrl(strHost.c_str());
     request->setRequestType(HttpRequest::Type::POST);
 
 	char aucBuf[256] = { 0 };
@@ -109,7 +122,8 @@ void GameSceneNet::receiveMoveFromServerTimerBack(float dt)
 {
 	log("timer %f", dt);
 	HttpRequest* request = new HttpRequest();
-	request->setUrl("http://192.168.1.176:9090/chessMoveGet");
+    std::string strHost = this->strServerHost + std::string("chessMoveGet");
+    request->setUrl(strHost.c_str());
     request->setRequestType(HttpRequest::Type::POST);
     request->setResponseCallback(this, httpresponse_selector(GameSceneNet::receiveMoveFromServer));
     char aucBuf[256] = { 0 };
@@ -160,13 +174,26 @@ void GameSceneNet::receiveMoveFromServer(HttpClient* client, HttpResponse* respo
 
 void GameSceneNet::getNetIdFromServer(void)
 {
+    if ((0 == strUserName.length()) || (0 == strPasswd.length()))
+    {
+        this->setNetLabel("error login info", Color3B::RED);
+        return;
+    }
+
 	HttpRequest* request = new HttpRequest();
-	request->setUrl("http://192.168.1.176:9090/newIdGet");
-	request->setRequestType(HttpRequest::Type::GET);
+
+    std::string strHost = this->strServerHost + std::string("newIdGet");
+    request->setUrl(strHost.c_str());
+	request->setRequestType(HttpRequest::Type::POST);
 	request->setResponseCallback(this, httpresponse_selector(GameSceneNet::receiveNetIdFromServer));
-	request->setTag("GET net id");
+
+    char aucBuf[256] = { 0 };
+    sprintf(aucBuf, "user=%s&passwd=%s", strUserName.c_str(), strPasswd.c_str());
+    request->setRequestData(aucBuf, strlen(aucBuf) + 1);
+
+    request->setTag("GET net id");
 	HttpClient::getInstance()->send(request);
-    
+
     log("request a net id from server");
 }
 
@@ -196,7 +223,7 @@ void GameSceneNet::receiveNetIdFromServer(HttpClient* client, HttpResponse* resp
     //记录分配的NETID
 	this->uiNetId = uiReadId;
 	log("get net id %d", uiReadId);
-    
+
     //替换网络信息标签
     auto pStr = String::createWithFormat("get net id %d", uiReadId);
     this->setNetLabel(pStr->getCString(), Color3B::YELLOW);
@@ -211,7 +238,8 @@ void GameSceneNet::getOppenetIdFromServer(float dt)
 
     //请求分配对手
     HttpRequest* request = new HttpRequest();
-    request->setUrl("http://192.168.1.176:9090/findOpponent");
+    std::string strHost = this->strServerHost + std::string("findOpponent");
+    request->setUrl(strHost.c_str());
     request->setRequestType(HttpRequest::Type::POST);
     request->setResponseCallback(this, httpresponse_selector(GameSceneNet::receiveOpponentIdFromServer));
     char aucBuf[256] = { 0 };
@@ -243,7 +271,7 @@ void GameSceneNet::receiveOpponentIdFromServer(HttpClient* client, HttpResponse*
     if (0 == uiReadId)
     {
         log("get opponent %d error", uiReadId);
-        exit(0);
+        this->menuCloseGame(this);
     }
 
     if (1 == uiReadId)
@@ -278,7 +306,8 @@ void GameSceneNet::sendLeaveGameToServer(void)
 
     //通知本地下线
     HttpRequest* request = new HttpRequest();
-    request->setUrl("http://192.168.1.176:9090/leaveGame");
+    std::string strHost = this->strServerHost + std::string("leaveGame");
+    request->setUrl(strHost.c_str());
     request->setRequestType(HttpRequest::Type::POST);
     char aucBuf[256] = { 0 };
     sprintf(aucBuf, "uiNetId=%d", this->uiNetId);

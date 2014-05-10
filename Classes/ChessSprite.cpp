@@ -62,10 +62,18 @@ bool ChessSprite::onTouchBegan(Touch* touch, Event* event)
 
     if (true == ret)
     {
-        auto* actionTo = RotateTo::create(0.02f, 10);
-        auto* actionBack = RotateTo::create(0.02f, -10);
-        auto* actionRep = RepeatForever::create(Sequence::create(actionTo, actionBack, NULL));
+        auto actionTo = RotateTo::create(0.02f, 10);
+        auto actionBack = RotateTo::create(0.02f, -10);
+        auto actionRep = RepeatForever::create(Sequence::create(actionTo, actionBack, NULL));
         this->runAction(actionRep);
+
+        auto actionMoveTo1 = MoveBy::create(0.02f, Point(1, 1));
+        auto actionMoveTo2 = MoveBy::create(0.02f, Point(1, -1));
+        auto actionMoveTo3 = MoveBy::create(0.02f, Point(-1, -1));
+        auto actionMoveTo4 = MoveBy::create(0.02f, Point(-1, 1));
+        auto actionRep2 = RepeatForever::create(Sequence::create(actionMoveTo1, actionMoveTo2, actionMoveTo3, actionMoveTo4, NULL));
+        this->runAction(actionRep2);
+
         this->position = getPosition();
         log("chess z order %d, vertex.z %f", this->getLocalZOrder(), this->getPositionZ());
         this->setLocalZOrder(2000);
@@ -84,6 +92,7 @@ void ChessSprite::onTouchEnded(Touch* touch, Event* event)
 {
     this->stopAllActions();
     this->setLocalZOrder(1);
+
     //将touch坐标初始化为屏幕坐标系
     Point point = touch->getLocation();
     point.y = Director::getInstance()->getOpenGLView()->getFrameSize().height - point.y;
@@ -122,7 +131,7 @@ void ChessSprite::onTouchEnded(Touch* touch, Event* event)
 
     //可以落子
     toPoint.y = Director::getInstance()->getOpenGLView()->getFrameSize().height - toPoint.y;
-    this->setPosition(toPoint);
+    this->setPosition(toPoint.x + 2.0 * CCRANDOM_MINUS1_1(), toPoint.y + 2.0 * CCRANDOM_MINUS1_1());
 
     //由棋局进行局面处理
     GameScene::getGameScene()->moveChess(uiChessId, uiX, uiY);

@@ -22,6 +22,8 @@ public:
 
     virtual void setGameWin(void);
 
+    static void setLoginInfo(std::string strUser, std::string strPwd);
+
 private:
     void setNetLabel(const char* pstr, const cocos2d::Color3B& color);
 
@@ -42,6 +44,7 @@ private:
     UINT uiOpponentId;
 	bool bCanMove;
     cocos2d::Label* pNetLabel;
+    std::string strServerHost;
 };
 
 #endif // __GAME_SCENENET_H__

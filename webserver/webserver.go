@@ -67,7 +67,7 @@ func netChessMove(w http.ResponseWriter, r *http.Request) {
 	mUser[iNetId].slMoveRecord = append(mUser[iNetId].slMoveRecord, UserMoveRecord{iChessId, iPosX, iPosY})
 	iOpponent := mUser[iNetId].iOpponentNetId
 	_, ok = mUser[iOpponent]
-	if false != ok {
+	if false != ok && true == mUser[iOpponent].bAlive && mUser[iOpponent].iOpponentNetId == iNetId {
 		mUser[iOpponent].slMoveRecord = append(mUser[iOpponent].slMoveRecord, UserMoveRecord{iChessId, iPosX, iPosY})
 		mUser[iOpponent].bNewMove = true
 	}
@@ -98,6 +98,10 @@ func netChessMoveGet(w http.ResponseWriter, r *http.Request) {
 	iLive := 1
 	_, ok = mUser[iOpponent]
 	if false == ok {
+		log.Println("error for manage userdata")
+		return
+	}
+	if false == mUser[iOpponent].bAlive || mUser[iOpponent].iOpponentNetId != iNetId {
 		iLive = 0
 		log.Println("userid ", iNetId, " opponent leave game")
 	}
@@ -106,7 +110,7 @@ func netChessMoveGet(w http.ResponseWriter, r *http.Request) {
 		log.Println("userid ", iNetId, " have no new moveinfo")
 		fmt.Fprintf(w, "%d-0-0-0", iLive)
 	} else {
-		stMoveInfo := mUser[iNetId].slMoveRecord[len(mUser[iNetId].slMoveRecord) - 1]
+		stMoveInfo := mUser[iNetId].slMoveRecord[len(mUser[iNetId].slMoveRecord)-1]
 		fmt.Fprintf(w, "%d-%d-%d-%d", iLive, stMoveInfo.iChessId, stMoveInfo.iPosX, stMoveInfo.iPosY)
 		mUser[iNetId].bNewMove = false
 		log.Println("userid ", iNetId, " is not get opponent move ", stMoveInfo)
@@ -120,33 +124,74 @@ type UserMoveRecord struct {
 }
 
 type UserData struct {
-	iUserNetId     int
+	iUserNetId  int
+	strUserName string
+	strPasswd   string
+
+	bAlive bool
+
 	iOpponentNetId int
 	bNewMove       bool
 	slMoveRecord   []UserMoveRecord
 }
 
-func (pstData *UserData) init(iNetId int) {
+func (pstData *UserData) init(iNetId int, strUser string, strPwd string) {
 	pstData.iUserNetId = iNetId
 	pstData.iOpponentNetId = 0
 	pstData.bNewMove = false
+	pstData.strUserName = strUser
+	pstData.strPasswd = strPwd
+	pstData.bAlive = false
 
 	var tmp []UserMoveRecord
 	pstData.slMoveRecord = tmp
 }
 
 var mUser map[int]*UserData
+var mUserKeyName map[string]*UserData
 
 func netNewIdGet(w http.ResponseWriter, r *http.Request) {
 	log.Println("request:netNewIdGet")
-	giNetIdIndex += 1
-	fmt.Fprintf(w, "%d", giNetIdIndex)
 
-	pstData := new(UserData)
-	pstData.init(giNetIdIndex)
-	mUser[giNetIdIndex] = pstData
+	if "POST" != r.Method {
+		return
+	}
 
-	log.Println("create new id : ", giNetIdIndex)
+	r.ParseForm()
+	_, ok := r.Form["user"]
+	if false == ok {
+		return
+	}
+	_, ok = r.Form["passwd"]
+	if false == ok {
+		return
+	}
+	strUser := r.Form["user"][0]
+	strPwd := r.Form["passwd"][0]
+	log.Println("user ", strUser, "passwd ", strPwd)
+
+	_, ok = mUserKeyName[strUser]
+	if false == ok {
+		giNetIdIndex += 1
+		fmt.Fprintf(w, "%d", giNetIdIndex)
+
+		pstData := new(UserData)
+		pstData.init(giNetIdIndex, strUser, strPwd)
+		mUser[giNetIdIndex] = pstData
+		mUserKeyName[strUser] = pstData
+
+		pstData.bAlive = true
+
+		log.Println("create new id : ", giNetIdIndex)
+	} else {
+		iNetId := mUserKeyName[strUser].iUserNetId
+
+		mUserKeyName[strUser].bAlive = true
+
+		fmt.Fprintf(w, "%d", iNetId)
+
+		log.Println("create new id : ", iNetId)
+	}
 }
 
 func netFindOpponent(w http.ResponseWriter, r *http.Request) {
@@ -165,7 +210,7 @@ func netFindOpponent(w http.ResponseWriter, r *http.Request) {
 	}
 	if 0 == mUser[iNetId].iOpponentNetId {
 		for iUser, pstData := range mUser {
-			if iUser != iNetId && 0 == pstData.iOpponentNetId {
+			if iUser != iNetId && true == pstData.bAlive && 0 == pstData.iOpponentNetId {
 				iOpponentId = iUser
 				iUserColor = 1
 				mUser[iNetId].iOpponentNetId = iUser
@@ -194,13 +239,18 @@ func netLeaveGame(w http.ResponseWriter, r *http.Request) {
 
 	_, ok := mUser[iNetId]
 	if true == ok {
-		delete(mUser, iNetId)
+		//delete(mUserKeyName, mUser[iNetId].strUserName)
+		//delete(mUser, iNetId)
+		mUser[iNetId].bAlive = false
+		mUser[iNetId].bNewMove = false
+		mUser[iNetId].iOpponentNetId = 0
 		log.Printf("userid %d leave game\n", iNetId)
 	}
 }
 
 func main() {
 	mUser = make(map[int]*UserData)
+	mUserKeyName = make(map[string]*UserData)
 	http.HandleFunc("/", pretestPrintRequest)
 	http.HandleFunc("/chessMove", netChessMove)
 	http.HandleFunc("/chessMoveGet", netChessMoveGet)
