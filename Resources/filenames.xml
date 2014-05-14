@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<array>
+    <dict>
+        <key>image_backgroud</key>
+        <string>ChessBackground2.png</string>
+        <key>image_Chesses</key>
+        <string>ChessesM.png</string>
+        <key>image_InfoBack</key>
+        <string>InfoBackground.png</string>
+        <key>image_closeNormal</key>
+        <string>CloseNormal.png</string>
+        <key>image_closeSelect</key>
+        <string>CloseSelected.png</string>
+    </dict>
+    <dict>
+    	<key>music_back</key>
+    	<string>background.mp3</string>
+    </dict>
+    <dict>
+    	<key>fonts_cn</key>
+    	<string>fonts/simhei.ttf</string>
+    	<key>fonts_en</key>
+    	<string>fonts/arial.ttf</string>
+    </dict>
+</array>
+</plist>

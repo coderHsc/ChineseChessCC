@@ -11,8 +11,7 @@ char* apstrColor[3] = {
     (char*)"Red"
 };
 
-std::string strUserName;
-std::string strPasswd;
+UINT g_uiNetId = 0;
 
 GameSceneNet::GameSceneNet()
 :uiNetId(0), bCanMove(false), pNetLabel(NULL), uiOpponentId(0), uiLocalColor(10000)
@@ -32,14 +31,20 @@ bool GameSceneNet::init(void)
 {
 	GameScene::init();
 
-    this->pNetLabel = Label::createWithTTF("getting net id", "fonts/GILSANUB.ttf", 20);
+    this->pNetLabel = Label::createWithTTF("loading", "fonts/GILSANUB.ttf", 20);
     this->pInfoGround->addChild(this->pNetLabel);
     this->pNetLabel->setPosition(this->pInfoGround->getContentSize().width * 0.5, this->pInfoGround->getContentSize().height - 80);
 
     this->strServerHost = std::string("http://192.168.1.176:9090/");
-    if (0 == this->uiNetId)
+    this->uiNetId = g_uiNetId;
+    if (0 != this->uiNetId)
     {
-        this->getNetIdFromServer();
+        this->schedule(schedule_selector(GameSceneNet::getOppenetIdFromServer), 3.0f);
+        this->setNetLabel("waiting opponent", Color3B::BLUE);
+    }
+    else
+    {
+        this->setNetLabel("Not Login", Color3B::RED);
     }
 
     return true;
@@ -62,10 +67,9 @@ GameScene* GameSceneNet::getGameScene()
 	return pGameScene;
 }
 
-void GameSceneNet::setLoginInfo(std::string strUser, std::string strPwd)
+void GameSceneNet::setLoginInfo(UINT uiNetId)
 {
-    strUserName = strUser;
-    strPasswd = strPwd;
+    g_uiNetId = uiNetId;
 }
 
 bool GameSceneNet::checkChessMoveIsValid(UINT uiChessId, UINT uiPosY, UINT uiPosX)
@@ -98,7 +102,7 @@ void GameSceneNet::moveChess(UINT uiChessId, UINT uiPosY, UINT uiPosX)
 
     GameScene::moveChess(uiChessId, uiPosY, uiPosX);
 
-    this->schedule(schedule_selector(GameSceneNet::receiveMoveFromServerTimerBack), 1.0f);
+    this->schedule(schedule_selector(GameSceneNet::receiveMoveFromServerTimerBack), 3.0f);
 	return;
 }
 
@@ -174,12 +178,6 @@ void GameSceneNet::receiveMoveFromServer(HttpClient* client, HttpResponse* respo
 
 void GameSceneNet::getNetIdFromServer(void)
 {
-    if ((0 == strUserName.length()) || (0 == strPasswd.length()))
-    {
-        this->setNetLabel("error login info", Color3B::RED);
-        return;
-    }
-
 	HttpRequest* request = new HttpRequest();
 
     std::string strHost = this->strServerHost + std::string("newIdGet");
@@ -188,7 +186,7 @@ void GameSceneNet::getNetIdFromServer(void)
 	request->setResponseCallback(this, httpresponse_selector(GameSceneNet::receiveNetIdFromServer));
 
     char aucBuf[256] = { 0 };
-    sprintf(aucBuf, "user=%s&passwd=%s", strUserName.c_str(), strPasswd.c_str());
+    //sprintf(aucBuf, "user=%s&passwd=%s", strUserName.c_str(), strPasswd.c_str());
     request->setRequestData(aucBuf, strlen(aucBuf) + 1);
 
     request->setTag("GET net id");
@@ -217,7 +215,7 @@ void GameSceneNet::receiveNetIdFromServer(HttpClient* client, HttpResponse* resp
 	if (0 == uiReadId)
 	{
 		log("get net id %d error", uiReadId);
-		exit(0);
+		this->menuCloseGame(this);
 	}
 
     //记录分配的NETID
@@ -228,8 +226,6 @@ void GameSceneNet::receiveNetIdFromServer(HttpClient* client, HttpResponse* resp
     auto pStr = String::createWithFormat("get net id %d", uiReadId);
     this->setNetLabel(pStr->getCString(), Color3B::YELLOW);
     response->getHttpRequest()->release();
-
-    this->schedule(schedule_selector(GameSceneNet::getOppenetIdFromServer), 1.0f);
 }
 
 void GameSceneNet::getOppenetIdFromServer(float dt)
@@ -247,7 +243,6 @@ void GameSceneNet::getOppenetIdFromServer(float dt)
     request->setRequestData(aucBuf, strlen(aucBuf) + 1);
     request->setTag("Find opponent");
     HttpClient::getInstance()->send(request);
-    request->release();
 }
 
 void GameSceneNet::receiveOpponentIdFromServer(HttpClient* client, HttpResponse* response)
@@ -298,6 +293,7 @@ void GameSceneNet::receiveOpponentIdFromServer(HttpClient* client, HttpResponse*
         auto pStr = String::createWithFormat("Local color %s", apstrColor[uiReadColor]);
         this->setNetLabel(pStr->getCString(), Color3B::YELLOW);
     }
+    response->getHttpRequest()->release();
 }
 
 void GameSceneNet::sendLeaveGameToServer(void)

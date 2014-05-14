@@ -1,8 +1,11 @@
 ﻿#include "GameMenu.h"
 #include "GameScene.h"
 #include "ChessSprite.h"
+#include "Config.h"
+#include "SimpleAudioEngine.h"
 
 USING_NS_CC;
+using namespace CocosDenshion;
 
 GameScene* GameScene::pGameScene = NULL;
 
@@ -67,7 +70,7 @@ bool GameScene::init(void)
 {
     Size size = Director::getInstance()->getWinSize();
 
-    Sprite *GameGround = Sprite::create("ChessBackground2.png");
+    Sprite *GameGround = Sprite::create(Config::getFilename("image_backgroud"));
     GameGround->setPosition(GameGround->getContentSize().width * 0.5, size.height * 0.5);
     this->addChild(GameGround, 0);
 
@@ -81,7 +84,7 @@ bool GameScene::init(void)
     pItemMenu->setPosition(60, 15);
     this->addChild(pItemMenu);
 
-    this->pInfoGround = Sprite::create("InfoBackground.png");
+    this->pInfoGround = Sprite::create(Config::getFilename("image_InfoBack"));
     this->pInfoGround->setPosition(GameGround->getContentSize().width + this->pInfoGround->getContentSize().width * 0.5, size.height * 0.5);
     this->addChild(pInfoGround, 0);
 
@@ -89,6 +92,9 @@ bool GameScene::init(void)
     this->pTurnLabel->setColor(Color3B::BLACK);
     this->pInfoGround->addChild(this->pTurnLabel);
     this->pTurnLabel->setPosition(this->pInfoGround->getContentSize().width * 0.5, this->pInfoGround->getContentSize().height - 30);
+
+    CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic(Config::getFilename("music_back").c_str());
+    SimpleAudioEngine::getInstance()->playBackgroundMusic(Config::getFilename("music_back").c_str(), true);
 
     return true;
 }
@@ -109,7 +115,7 @@ void GameScene::CreateChesses(void)
 {
     log("*********CreateChesses****************");
     std::vector<std::vector<UINT> > vecMatrix = this->pChessGame->GetMatrix();
-    auto pSpriteText = Director::getInstance()->getTextureCache()->addImage("ChessesM.png");
+    auto pSpriteText = Director::getInstance()->getTextureCache()->addImage(Config::getFilename("image_Chesses"));
     float fHeight = Director::getInstance()->getOpenGLView()->getFrameSize().height;
     for (UINT uiLine = 1; uiLine <= CHESS_DATA_LINES; uiLine++)
     {
@@ -200,7 +206,7 @@ void GameScene::moveChessToTrash(UINT uiChessId)
     auto pChess = this->getChildByTag(CHESS_TAG_BASE + uiChessId);
     pChess->removeFromParent();
 
-    auto pSpriteText = Director::getInstance()->getTextureCache()->getTextureForKey("ChessesM.png");
+    auto pSpriteText = Director::getInstance()->getTextureCache()->getTextureForKey(Config::getFilename("image_Chesses"));
     auto pNewChess = ChessSprite::createWithTexture(pSpriteText, arrayChessImageText[uiChessId]);
 
     UINT uiIndex = this->uiTrashNum / 4;
@@ -231,6 +237,7 @@ void GameScene::setGameWin(void)
 
 void GameScene::menuCloseGame(Ref* pSender)
 {
+    SimpleAudioEngine::getInstance()->stopBackgroundMusic();
     Director::getInstance()->replaceScene(GameMenu::scene());
 }
 

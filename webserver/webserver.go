@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"toolsql"
 )
 
 func PrintRequest(r *http.Request) {
@@ -148,10 +149,52 @@ func (pstData *UserData) init(iNetId int, strUser string, strPwd string) {
 }
 
 var mUser map[int]*UserData
-var mUserKeyName map[string]*UserData
 
-func netNewIdGet(w http.ResponseWriter, r *http.Request) {
-	log.Println("request:netNewIdGet")
+func netCreateNewUser(w http.ResponseWriter, r *http.Request) {
+	log.Println("request:createNewUser")
+
+	//检查请求
+	if "POST" != r.Method {
+		return
+	}
+
+	//解析请求中的用户名和密口令
+	r.ParseForm()
+	_, ok := r.Form["user"]
+	if false == ok {
+		return
+	}
+	_, ok = r.Form["passwd"]
+	if false == ok {
+		return
+	}
+	strUser := r.Form["user"][0]
+	strPwd := r.Form["passwd"][0]
+	log.Println("register user", strUser, len(strUser), "passwd", strPwd, len(strPwd), ".")
+
+	//检查用户名和口令的合法性
+	if 3 > len(strUser) {
+		fmt.Fprintf(w, "ret=failed uid=0 reason %s", "invalid username")
+		return
+	}
+	if 3 > len(strPwd) {
+		fmt.Fprintf(w, "ret=failed uid=0 reason %s", "invalid password")
+		return
+	}
+
+	//尝试向数据库注册用户
+	iUid, strRet := toolsql.CreateUser(strUser, strPwd)
+	if 0 == iUid {
+		fmt.Fprintf(w, "ret=failed uid=0 reason %s", strRet)
+		return
+	}
+
+	fmt.Fprintf(w, "ret=success uid=%d reason", iUid)
+	log.Println("create new user", iUid)
+}
+
+func netUserLogin(w http.ResponseWriter, r *http.Request) {
+	log.Println("request:netUserLogin")
 
 	if "POST" != r.Method {
 		return
@@ -168,30 +211,25 @@ func netNewIdGet(w http.ResponseWriter, r *http.Request) {
 	}
 	strUser := r.Form["user"][0]
 	strPwd := r.Form["passwd"][0]
-	log.Println("user ", strUser, "passwd ", strPwd)
+	log.Println("login user ", strUser, len(strUser), "passwd", strPwd, len(strPwd), ".")
 
-	_, ok = mUserKeyName[strUser]
-	if false == ok {
-		giNetIdIndex += 1
-		fmt.Fprintf(w, "%d", giNetIdIndex)
-
-		pstData := new(UserData)
-		pstData.init(giNetIdIndex, strUser, strPwd)
-		mUser[giNetIdIndex] = pstData
-		mUserKeyName[strUser] = pstData
-
-		pstData.bAlive = true
-
-		log.Println("create new id : ", giNetIdIndex)
-	} else {
-		iNetId := mUserKeyName[strUser].iUserNetId
-
-		mUserKeyName[strUser].bAlive = true
-
-		fmt.Fprintf(w, "%d", iNetId)
-
-		log.Println("create new id : ", iNetId)
+	iUid, strRet := toolsql.GetUserId(strUser, strPwd)
+	if 0 == iUid {
+		fmt.Fprintf(w, "ret=failed uid=0 reason %s", strRet)
+		return
 	}
+
+	_, ok = mUser[iUid]
+	if false == ok {
+		pstData := new(UserData)
+		pstData.init(iUid, strUser, strPwd)
+		mUser[iUid] = pstData
+
+		log.Println("create new userdata")
+	}
+
+	fmt.Fprintf(w, "ret=success uid=%d reason", iUid)
+	log.Println("user", iUid, "login")
 }
 
 func netFindOpponent(w http.ResponseWriter, r *http.Request) {
@@ -208,6 +246,9 @@ func netFindOpponent(w http.ResponseWriter, r *http.Request) {
 		log.Println("userid ", iNetId, " is not exist")
 		return
 	}
+
+	mUser[iUid].bAlive = true
+
 	if 0 == mUser[iNetId].iOpponentNetId {
 		for iUser, pstData := range mUser {
 			if iUser != iNetId && true == pstData.bAlive && 0 == pstData.iOpponentNetId {
@@ -239,8 +280,6 @@ func netLeaveGame(w http.ResponseWriter, r *http.Request) {
 
 	_, ok := mUser[iNetId]
 	if true == ok {
-		//delete(mUserKeyName, mUser[iNetId].strUserName)
-		//delete(mUser, iNetId)
 		mUser[iNetId].bAlive = false
 		mUser[iNetId].bNewMove = false
 		mUser[iNetId].iOpponentNetId = 0
@@ -249,16 +288,29 @@ func netLeaveGame(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	mUser = make(map[int]*UserData)
-	mUserKeyName = make(map[string]*UserData)
+	webInit()
+
 	http.HandleFunc("/", pretestPrintRequest)
+	http.HandleFunc("/regUser", netCreateNewUser)
+	http.HandleFunc("/login", netUserLogin)
 	http.HandleFunc("/chessMove", netChessMove)
 	http.HandleFunc("/chessMoveGet", netChessMoveGet)
-	http.HandleFunc("/newIdGet", netNewIdGet)
 	http.HandleFunc("/findOpponent", netFindOpponent)
 	http.HandleFunc("/leaveGame", netLeaveGame)
 	err := http.ListenAndServe(":9090", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
+
+	webDeInit()
+}
+
+func webInit() {
+	toolsql.InitDatabase("root:123456@tcp(localhost:3306)/chinesechess_test_01?&charset=utf8")
+
+	mUser = make(map[int]*UserData)
+}
+
+func webDeInit() {
+	toolsql.DeInitDatabase()
 }

@@ -22,7 +22,7 @@ public:
 
     virtual void setGameWin(void);
 
-    static void setLoginInfo(std::string strUser, std::string strPwd);
+    static void setLoginInfo(UINT uiNetId);
 
 private:
     void setNetLabel(const char* pstr, const cocos2d::Color3B& color);
