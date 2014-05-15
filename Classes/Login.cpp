@@ -73,7 +73,7 @@ bool Login::init(void)
     pItemMenuClose->setPosition(size.width * CF_P("pos_login_return_w"), size.height * CF_P("pos_login_return_h"));
     this->addChild(pItemMenuClose);
 
-    this->strServerHost = std::string("http://192.168.1.176:9090/");
+    this->strServerHost = CF_N("host");
 
     return true;
 }
@@ -96,7 +96,7 @@ void Login::menuLoginOk(Ref* pSender)
 
     HttpRequest* request = new HttpRequest();
 
-    std::string strHost = this->strServerHost + std::string("login");
+    std::string strHost = this->strServerHost + CF_N("path_login");
     request->setUrl(strHost.c_str());
     request->setRequestType(HttpRequest::Type::POST);
     request->setResponseCallback(this, httpresponse_selector(Login::receiveLoginResult));
@@ -118,7 +118,7 @@ void Login::menuRegOk(Ref* pSender)
 
     HttpRequest* request = new HttpRequest();
 
-    std::string strHost = this->strServerHost + std::string("regUser");
+    std::string strHost = this->strServerHost + CF_N("path_register");
     request->setUrl(strHost.c_str());
     request->setRequestType(HttpRequest::Type::POST);
     request->setResponseCallback(this, httpresponse_selector(Login::receiveRegResult));

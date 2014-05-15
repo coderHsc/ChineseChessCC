@@ -28,6 +28,7 @@ public:
 
 protected:
     void setLastMoveColor(UINT uiChessColor);
+    void setTurnLabel(const char* pstr, const cocos2d::Color3B& color);
 
     cocos2d::Sprite *pInfoGround;
 
@@ -38,7 +39,6 @@ private:
 	void resetChessGame();
 
     void moveChessToTrash(UINT uiChessId);
-    void setTurnLabel(const char* pstr, const cocos2d::Color3B& color);
 
 	ChessGame* pChessGame;
     cocos2d::Label* pTurnLabel;

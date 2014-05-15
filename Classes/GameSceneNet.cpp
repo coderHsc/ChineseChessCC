@@ -26,11 +26,12 @@ bool GameSceneNet::init(void)
 {
 	GameScene::init();
 
+    this->setTurnLabel(CF_S("info_black_turn").c_str(), Color3B::BLACK);
     this->pNetLabel = Label::createWithTTF(CF_S("netinfo_loading"), Config::getFilename("fonts_cn"), CF_FT("font_info"));
     this->pInfoGround->addChild(this->pNetLabel);
     this->pNetLabel->setPosition(this->pInfoGround->getContentSize().width * 0.5, this->pInfoGround->getContentSize().height * CF_P("pos_game_netinfo"));
 
-    this->strServerHost = std::string("http://192.168.1.176:9090/");
+    this->strServerHost = CF_N("host");
     this->uiNetId = g_uiNetId;
     if (0 != this->uiNetId)
     {
@@ -107,7 +108,7 @@ void GameSceneNet::moveChess(UINT uiChessId, UINT uiPosY, UINT uiPosX)
 void GameSceneNet::sendMoveToServer(UINT uiChessId, UINT uiPosY, UINT uiPosX)
 {
 	HttpRequest* request = new HttpRequest();
-    std::string strHost = this->strServerHost + std::string("chessMove");
+    std::string strHost = this->strServerHost + CF_N("path_move_send");
     request->setUrl(strHost.c_str());
     request->setRequestType(HttpRequest::Type::POST);
 
@@ -124,7 +125,7 @@ void GameSceneNet::receiveMoveFromServerTimerBack(float dt)
 {
 	log("timer %f", dt);
 	HttpRequest* request = new HttpRequest();
-    std::string strHost = this->strServerHost + std::string("chessMoveGet");
+    std::string strHost = this->strServerHost + CF_N("path_move_get");
     request->setUrl(strHost.c_str());
     request->setRequestType(HttpRequest::Type::POST);
     request->setResponseCallback(this, httpresponse_selector(GameSceneNet::receiveMoveFromServer));
@@ -180,7 +181,7 @@ void GameSceneNet::getOppenetIdFromServer(float dt)
 
     //请求分配对手
     HttpRequest* request = new HttpRequest();
-    std::string strHost = this->strServerHost + std::string("findOpponent");
+    std::string strHost = this->strServerHost + CF_N("path_match_oppo");
     request->setUrl(strHost.c_str());
     request->setRequestType(HttpRequest::Type::POST);
     request->setResponseCallback(this, httpresponse_selector(GameSceneNet::receiveOpponentIdFromServer));
@@ -254,7 +255,7 @@ void GameSceneNet::sendLeaveGameToServer(void)
 
     //通知本地下线
     HttpRequest* request = new HttpRequest();
-    std::string strHost = this->strServerHost + std::string("leaveGame");
+    std::string strHost = this->strServerHost + CF_N("path_leave_game");
     request->setUrl(strHost.c_str());
     request->setRequestType(HttpRequest::Type::POST);
     char aucBuf[256] = { 0 };

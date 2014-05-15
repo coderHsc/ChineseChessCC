@@ -7,6 +7,7 @@ std::map<std::string, std::string> Config::mStrings;
 std::map<std::string, int> Config::_mFonts;
 std::map<std::string, float> Config::_mTimer;
 std::map<std::string, float> Config::_mPos;
+std::map<std::string, std::string> Config::_mNetPath;
 Size Config::_sizeChess;
 Size Config::_sizeBox;
 Size Config::_sizeEdge;
@@ -52,6 +53,17 @@ bool Config::init()
         {
             log("read config : key %s, value %f.", text_map_pair.first.c_str(), text_map_pair.second.asFloat());
             Config::procOneSizeConfig(text_map_pair.first, text_map_pair.second.asFloat());
+        }
+    }
+
+    txt_vec = FileUtils::getInstance()->getValueVectorFromFile("net.xml");
+    for (auto& value : txt_vec)
+    {
+        auto text_map = value.asValueMap();
+        for (auto& text_map_pair : text_map)
+        {
+            log("read config : key %s, value %f.", text_map_pair.first.c_str(), text_map_pair.second.asString().c_str());
+            Config::_mNetPath[text_map_pair.first] = text_map_pair.second.asString();
         }
     }
 
@@ -143,6 +155,11 @@ float Config::getTimerSize(std::string strTimerSizeIndex)
 float Config::getPos(std::string strPosIndex)
 {
 	return Config::_mPos[strPosIndex];
+}
+
+std::string Config::getNetPath(std::string strNetIndex)
+{
+    return Config::_mNetPath[strNetIndex];
 }
 
 Size& Config::getChessSize()

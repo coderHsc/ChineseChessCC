@@ -8,6 +8,7 @@
 #define CF_FT(str) Config::getFontsSize(str)
 #define CF_T(str) Config::getTimerSize(str)
 #define CF_P(str) Config::getPos(str)
+#define CF_N(str) Config::getNetPath(str)
 
 struct CHESS_JITTER_ARRT {
 	float	fWidth;
@@ -29,6 +30,7 @@ public:
     static int getFontsSize(std::string strFontsSizeIndex);
     static float getTimerSize(std::string strTimerSizeIndex);
     static float getPos(std::string strPosIndex);
+    static std::string getNetPath(std::string strNetIndex);
     static cocos2d::Size& getChessSize();
     static cocos2d::Size& getBoxSize();
     static cocos2d::Size& getEdgeSize();
@@ -42,6 +44,7 @@ private:
     static std::map<std::string, int> _mFonts;
     static std::map<std::string, float> _mTimer;
     static std::map<std::string, float> _mPos;
+    static std::map<std::string, std::string> _mNetPath;
     static cocos2d::Size _sizeChess;
     static cocos2d::Size _sizeBox;
     static cocos2d::Size _sizeEdge;
