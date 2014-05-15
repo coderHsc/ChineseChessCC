@@ -3,6 +3,9 @@
 
 #include "cocos2d.h"
 
+#define CF_F(str) Config::getFilename(str)
+#define CF_S(str) Config::getString(str)
+
 class Config
 {
 public:

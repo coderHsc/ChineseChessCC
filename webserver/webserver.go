@@ -247,7 +247,7 @@ func netFindOpponent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	mUser[iUid].bAlive = true
+	mUser[iNetId].bAlive = true
 
 	if 0 == mUser[iNetId].iOpponentNetId {
 		for iUser, pstData := range mUser {

@@ -1,15 +1,16 @@
 ﻿#include "GameMenu.h"
 #include "GameSceneNet.h"
 #include "ChessSprite.h"
+#include "Config.h"
 
 USING_NS_CC;
 using namespace cocos2d::network;
 
-char* apstrColor[3] = {
+/*char* apstrColor[3] = {
     (char*)"invalid",
     (char*)"Black",
     (char*)"Red"
-};
+};*/
 
 UINT g_uiNetId = 0;
 
@@ -31,7 +32,7 @@ bool GameSceneNet::init(void)
 {
 	GameScene::init();
 
-    this->pNetLabel = Label::createWithTTF("loading", "fonts/GILSANUB.ttf", 20);
+    this->pNetLabel = Label::createWithTTF(CF_S("netinfo_loading"), Config::getFilename("fonts_cn"), 20);
     this->pInfoGround->addChild(this->pNetLabel);
     this->pNetLabel->setPosition(this->pInfoGround->getContentSize().width * 0.5, this->pInfoGround->getContentSize().height - 80);
 
@@ -40,11 +41,11 @@ bool GameSceneNet::init(void)
     if (0 != this->uiNetId)
     {
         this->schedule(schedule_selector(GameSceneNet::getOppenetIdFromServer), 3.0f);
-        this->setNetLabel("waiting opponent", Color3B::BLUE);
+        this->setNetLabel(CF_S("netinfo_wait_oppo").c_str(), Color3B::BLUE);
     }
     else
     {
-        this->setNetLabel("Not Login", Color3B::RED);
+        this->setNetLabel(CF_S("netinfo_no_login").c_str(), Color3B::RED);
     }
 
     return true;
@@ -171,61 +172,9 @@ void GameSceneNet::receiveMoveFromServer(HttpClient* client, HttpResponse* respo
     if (0 == uiLive)
     {
         this->bCanMove = false;
-        this->setNetLabel("Opponent\nleave game", Color3B::RED);
+        this->setNetLabel(CF_S("netinfo_oppo_leave").c_str(), Color3B::RED);
         this->unschedule(schedule_selector(GameSceneNet::receiveMoveFromServerTimerBack));
     }
-}
-
-void GameSceneNet::getNetIdFromServer(void)
-{
-	HttpRequest* request = new HttpRequest();
-
-    std::string strHost = this->strServerHost + std::string("newIdGet");
-    request->setUrl(strHost.c_str());
-	request->setRequestType(HttpRequest::Type::POST);
-	request->setResponseCallback(this, httpresponse_selector(GameSceneNet::receiveNetIdFromServer));
-
-    char aucBuf[256] = { 0 };
-    //sprintf(aucBuf, "user=%s&passwd=%s", strUserName.c_str(), strPasswd.c_str());
-    request->setRequestData(aucBuf, strlen(aucBuf) + 1);
-
-    request->setTag("GET net id");
-	HttpClient::getInstance()->send(request);
-
-    log("request a net id from server");
-}
-
-void GameSceneNet::receiveNetIdFromServer(HttpClient* client, HttpResponse* response)
-{
-    //检查响应是否成功
-	if (!response->isSucceed())
-	{
-		log("response failed in receiveNetIdFromServer");
-		log("error buffer: %s", response->getErrorBuffer());
-		return;
-	}
-
-    //读取响应
-	std::vector<char> *buffer = response->getResponseData();
-    std::string strBuff(buffer->begin(), buffer->end());
-
-    UINT uiReadId = 0;
-    sscanf(strBuff.c_str(), "%d", &uiReadId);
-
-	if (0 == uiReadId)
-	{
-		log("get net id %d error", uiReadId);
-		this->menuCloseGame(this);
-	}
-
-    //记录分配的NETID
-	this->uiNetId = uiReadId;
-	log("get net id %d", uiReadId);
-
-    //替换网络信息标签
-    auto pStr = String::createWithFormat("get net id %d", uiReadId);
-    this->setNetLabel(pStr->getCString(), Color3B::YELLOW);
-    response->getHttpRequest()->release();
 }
 
 void GameSceneNet::getOppenetIdFromServer(float dt)
@@ -290,8 +239,14 @@ void GameSceneNet::receiveOpponentIdFromServer(HttpClient* client, HttpResponse*
         this->bCanMove = true;
 
         //替换网络信息标签
-        auto pStr = String::createWithFormat("Local color %s", apstrColor[uiReadColor]);
-        this->setNetLabel(pStr->getCString(), Color3B::YELLOW);
+        if (CHESSCOCLOR_RED == this->uiLocalColor)
+        {
+            this->setNetLabel(CF_S("netinfo_local_red").c_str(), Color3B::YELLOW);
+        }
+        else
+        {
+            this->setNetLabel(CF_S("netinfo_local_black").c_str(), Color3B::YELLOW);
+        }
     }
     response->getHttpRequest()->release();
 }

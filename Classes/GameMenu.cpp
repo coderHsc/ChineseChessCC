@@ -21,19 +21,19 @@ bool GameMenu::init(void)
 {
     Menu* pItemMenu = Menu::create();
 
-    //TTFConfig ttfConfig(Config::getFilename("fonts_en").c_str(), 48);
-    TTFConfig ttfConfig2(Config::getFilename("fonts_cn").c_str(), 48);
+    //TTFConfig ttfConfig(CF_F("fonts_en").c_str(), 48);
+    TTFConfig ttfConfig2(CF_F("fonts_cn").c_str(), 48);
 
-    auto label = Label::createWithTTF(ttfConfig2, Config::getString("label_normal_start"));
+    auto label = Label::createWithTTF(ttfConfig2, CF_S("label_normal_start"));
     MenuItemLabel* pMenuItem = MenuItemLabel::create(label, CC_CALLBACK_1(GameMenu::menuNormalGameCallback, this));
 
-    auto labelInput = Label::createWithTTF(ttfConfig2, Config::getString("label_login"));
+    auto labelInput = Label::createWithTTF(ttfConfig2, CF_S("label_login"));
     MenuItemLabel* pMenuInput = MenuItemLabel::create(labelInput, CC_CALLBACK_1(GameMenu::menuInputId, this));
 
     auto labelNetPost = Label::createWithTTF(ttfConfig2, "netPostTest");
     MenuItemLabel* pMenuItemNetPostTest = MenuItemLabel::create(labelNetPost, CC_CALLBACK_1(GameMenu::onMenuPostTestClicked, this));
 
-    auto labelLan = Label::createWithTTF(ttfConfig2, Config::getString("label_net_start"));
+    auto labelLan = Label::createWithTTF(ttfConfig2, CF_S("label_net_start"));
     MenuItemLabel* pMenuItemLanTest = MenuItemLabel::create(labelLan, CC_CALLBACK_1(GameMenu::menuNetGameCallback, this));
 
     pItemMenu->addChild(pMenuItem);
@@ -47,7 +47,7 @@ bool GameMenu::init(void)
 
     this->addChild(pItemMenu);
 
-    MenuItemImage *pCloseItem = MenuItemImage::create(Config::getFilename("image_closeNormal"), Config::getFilename("image_closeSelect"),
+    MenuItemImage *pCloseItem = MenuItemImage::create(CF_F("image_closeNormal"), CF_F("image_closeSelect"),
         CC_CALLBACK_1(GameMenu::menuCloseCallback, this));
     Menu* pCloseMenu = Menu::create(pCloseItem, NULL);
     pCloseMenu->setPositionY(200);

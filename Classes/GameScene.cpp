@@ -70,7 +70,7 @@ bool GameScene::init(void)
 {
     Size size = Director::getInstance()->getWinSize();
 
-    Sprite *GameGround = Sprite::create(Config::getFilename("image_backgroud"));
+    Sprite *GameGround = Sprite::create(CF_F("image_backgroud"));
     GameGround->setPosition(GameGround->getContentSize().width * 0.5, size.height * 0.5);
     this->addChild(GameGround, 0);
 
@@ -78,23 +78,23 @@ bool GameScene::init(void)
     CreateChesses();
 
     Menu* pItemMenu = Menu::create();
-    auto labelClose = Label::createWithTTF("close game", "fonts/arial.ttf", 20);
+    auto labelClose = Label::createWithTTF(CF_S("label_exit_game"), CF_F("fonts_cn"), 18);
     MenuItemLabel* pMenuClose = MenuItemLabel::create(labelClose, CC_CALLBACK_1(GameScene::menuCloseGame, this));
     pItemMenu->addChild(pMenuClose);
     pItemMenu->setPosition(60, 15);
     this->addChild(pItemMenu);
 
-    this->pInfoGround = Sprite::create(Config::getFilename("image_InfoBack"));
+    this->pInfoGround = Sprite::create(CF_F("image_InfoBack"));
     this->pInfoGround->setPosition(GameGround->getContentSize().width + this->pInfoGround->getContentSize().width * 0.5, size.height * 0.5);
     this->addChild(pInfoGround, 0);
 
-    this->pTurnLabel = Label::createWithTTF("Now turn BLACK", "fonts/GILSANUB.ttf", 20);
+    this->pTurnLabel = Label::createWithTTF(CF_S("info_start_both_turn"), CF_F("fonts_cn"), 20);
     this->pTurnLabel->setColor(Color3B::BLACK);
     this->pInfoGround->addChild(this->pTurnLabel);
     this->pTurnLabel->setPosition(this->pInfoGround->getContentSize().width * 0.5, this->pInfoGround->getContentSize().height - 30);
 
-    CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic(Config::getFilename("music_back").c_str());
-    SimpleAudioEngine::getInstance()->playBackgroundMusic(Config::getFilename("music_back").c_str(), true);
+    CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic(CF_F("music_back").c_str());
+    SimpleAudioEngine::getInstance()->playBackgroundMusic(CF_F("music_back").c_str(), true);
 
     return true;
 }
@@ -115,7 +115,7 @@ void GameScene::CreateChesses(void)
 {
     log("*********CreateChesses****************");
     std::vector<std::vector<UINT> > vecMatrix = this->pChessGame->GetMatrix();
-    auto pSpriteText = Director::getInstance()->getTextureCache()->addImage(Config::getFilename("image_Chesses"));
+    auto pSpriteText = Director::getInstance()->getTextureCache()->addImage(CF_F("image_Chesses"));
     float fHeight = Director::getInstance()->getOpenGLView()->getFrameSize().height;
     for (UINT uiLine = 1; uiLine <= CHESS_DATA_LINES; uiLine++)
     {
@@ -185,11 +185,11 @@ void GameScene::moveChess(UINT uiChessId, UINT uiPosY, UINT uiPosX)
 
     if (CHESSCOCLOR_BLACK == uiLastMoveColor)
     {
-        this->setTurnLabel("Now turn RED", Color3B::RED);
+        this->setTurnLabel(CF_S("info_red_turn").c_str(), Color3B::RED);
     }
     else
     {
-        this->setTurnLabel("Now turn BLACK", Color3B::BLACK);
+        this->setTurnLabel(CF_S("info_black_turn").c_str(), Color3B::BLACK);
     }
 
 
@@ -206,7 +206,7 @@ void GameScene::moveChessToTrash(UINT uiChessId)
     auto pChess = this->getChildByTag(CHESS_TAG_BASE + uiChessId);
     pChess->removeFromParent();
 
-    auto pSpriteText = Director::getInstance()->getTextureCache()->getTextureForKey(Config::getFilename("image_Chesses"));
+    auto pSpriteText = Director::getInstance()->getTextureCache()->getTextureForKey(CF_F("image_Chesses"));
     auto pNewChess = ChessSprite::createWithTexture(pSpriteText, arrayChessImageText[uiChessId]);
 
     UINT uiIndex = this->uiTrashNum / 4;
@@ -221,16 +221,14 @@ void GameScene::moveChessToTrash(UINT uiChessId)
 
 void GameScene::setGameWin(void)
 {
-    char* pstr = NULL;
     if (CHESSCOCLOR_BLACK == this->pChessGame->GetChessColor(uiLastMoveColor))
     {
-        pstr = (char*)"Black Win !!!";
+        this->setTurnLabel(CF_S("info_black_win").c_str(), Color3B::YELLOW);
     }
     else
     {
-        pstr = (char*)"Red Win !!!";
+        this->setTurnLabel(CF_S("info_red_win").c_str(), Color3B::YELLOW);
     }
-    this->setTurnLabel(pstr, Color3B::YELLOW);
 
     this->bGameStop = true;
 }

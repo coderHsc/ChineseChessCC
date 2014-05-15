@@ -1,6 +1,7 @@
 ﻿#include "Login.h"
 #include "GameMenu.h"
 #include "GameSceneNet.h"
+#include "Config.h"
 
 USING_NS_CC;
 using namespace cocos2d::network;
@@ -30,15 +31,15 @@ bool Login::init(void)
 
     Menu* pItemMenu = Menu::create();
 
-    TTFConfig ttfConfig("fonts/arial.ttf", 48);
+    TTFConfig ttfConfig(CF_F("fonts_cn").c_str(), 48);
 
-    auto pLabelLogin = Label::createWithTTF(ttfConfig, "Login");
+    auto pLabelLogin = Label::createWithTTF(ttfConfig, CF_S("label_login_login"));
     MenuItemLabel* pMenuItemLogin = MenuItemLabel::create(pLabelLogin, CC_CALLBACK_1(Login::menuLoginOk, this));
 
     pItemMenu->addChild(pMenuItemLogin);
     pMenuItemLogin->setPosition(-100, -200);
 
-    auto pLabelReg = Label::createWithTTF(ttfConfig, "Register");
+    auto pLabelReg = Label::createWithTTF(ttfConfig, CF_S("label_login_register"));
     MenuItemLabel* pMenuItemReg = MenuItemLabel::create(pLabelReg, CC_CALLBACK_1(Login::menuRegOk, this));
 
     pItemMenu->addChild(pMenuItemReg);
@@ -51,21 +52,21 @@ bool Login::init(void)
     listener->onTouchEnded = CC_CALLBACK_2(Login::onTouchEnded, this);
     _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
 
-    _pTextFieldUserName = TextFieldTTF::textFieldWithPlaceHolder("<click here for input>", "fonts/arial.ttf", 30);
+    _pTextFieldUserName = TextFieldTTF::textFieldWithPlaceHolder("<click here for input>", CF_F("fonts_en"), 30);
     this->addChild(_pTextFieldUserName);
     _pTextFieldUserName->setPosition(size.width * 0.5, size.height * 0.5 + 40);
 
-    _pTextFieldPasswd = TextFieldTTF::textFieldWithPlaceHolder("<click here for input>", "fonts/arial.ttf", 30);
+    _pTextFieldPasswd = TextFieldTTF::textFieldWithPlaceHolder("<click here for input>", CF_F("fonts_en"), 30);
     this->addChild(_pTextFieldPasswd);
     _pTextFieldPasswd->setPosition(size.width * 0.5, size.height * 0.5 - 20);
     _pTextFieldPasswd->setSecureTextEntry(true);
 
-    _pInfoLabel = Label::createWithTTF("please login", "fonts/GILSANUB.ttf", 48);
+    _pInfoLabel = Label::createWithTTF(CF_S("label_login_please"), CF_F("fonts_cn"), 48);
     this->addChild(_pInfoLabel);
     _pInfoLabel->setPosition(size.width * 0.5, size.height * 0.5 + 190);
 
     Menu* pItemMenuClose = Menu::create();
-    auto labelClose = Label::createWithTTF("close game", "fonts/arial.ttf", 20);
+    auto labelClose = Label::createWithTTF(CF_S("label_return"), CF_F("fonts_cn"), 20);
     MenuItemLabel* pMenuClose = MenuItemLabel::create(labelClose, CC_CALLBACK_1(Login::menuClose, this));
     pItemMenuClose->addChild(pMenuClose);
     pItemMenuClose->setPosition(60, 15);
@@ -157,11 +158,11 @@ void Login::receiveRegResult(HttpClient* client, HttpResponse* response)
 
     if (0 == uiReadId)
     {
-        std::string strRetReason(strBuff.substr(strBuff.find("reason")));
+        std::string strRetReason(strBuff.substr(strBuff.find("reason") + 6));
         log("register error: %s", strRetReason.c_str());
 
         //替换网络信息标签
-        auto pStr = String::createWithFormat("register falied\n%s", strRetReason.c_str());
+        auto pStr = String::createWithFormat("%s\n%s", CF_S("userinfo_register_failed").c_str(), strRetReason.c_str());
         this->setInfoLabel(pStr->getCString(), Color3B::RED);
         response->getHttpRequest()->release();
 
@@ -169,7 +170,7 @@ void Login::receiveRegResult(HttpClient* client, HttpResponse* response)
     }
 
     //替换信息标签
-    auto pStr = String::createWithFormat("register succed");
+    auto pStr = String::createWithFormat("%s", CF_S("userinfo_register_succeed").c_str());
     this->setInfoLabel(pStr->getCString(), Color3B::BLUE);
     response->getHttpRequest()->release();
 
@@ -197,11 +198,11 @@ void Login::receiveLoginResult(HttpClient* client, HttpResponse* response)
 
     if (0 == uiReadId)
     {
-        std::string strRetReason(strBuff.substr(strBuff.find("reason")));
+        std::string strRetReason(strBuff.substr(strBuff.find("reason") + 6));
         log("login error: %s", strRetReason.c_str());
 
         //替换网络信息标签
-        auto pStr = String::createWithFormat("login failed\n%s", strRetReason.c_str());
+        auto pStr = String::createWithFormat("%s\n%s", CF_S("userinfo_login_failed").c_str(), strRetReason.c_str());
         this->setInfoLabel(pStr->getCString(), Color3B::RED);
         response->getHttpRequest()->release();
 
@@ -212,7 +213,7 @@ void Login::receiveLoginResult(HttpClient* client, HttpResponse* response)
     GameSceneNet::setLoginInfo(uiReadId);
 
     //替换信息标签
-    auto pStr = String::createWithFormat("login succed");
+    auto pStr = String::createWithFormat("%s", CF_S("userinfo_login_succeed").c_str());
     this->setInfoLabel(pStr->getCString(), Color3B::BLUE);
     response->getHttpRequest()->release();
 
