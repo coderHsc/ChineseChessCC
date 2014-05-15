@@ -1,7 +1,11 @@
 ﻿#include "ChessSprite.h"
 #include "GameScene.h"
+#include "Config.h"
 
 USING_NS_CC;
+
+#define Z_TOP_CHESS 2000
+#define Z_BOTTOM_CHESS 1
 
 ChessSprite::ChessSprite(void)
 {
@@ -62,21 +66,24 @@ bool ChessSprite::onTouchBegan(Touch* touch, Event* event)
 
     if (true == ret)
     {
-        auto actionTo = RotateTo::create(0.02f, 10);
-        auto actionBack = RotateTo::create(0.02f, -10);
+        float fLoop = Config::getChessJitter().fLoop;
+        float fWidth = Config::getChessJitter().fWidth;
+        float fAngle = Config::getChessJitter().fAngle;
+        auto actionTo = RotateTo::create(fLoop, fAngle);
+        auto actionBack = RotateTo::create(fLoop, -fAngle);
         auto actionRep = RepeatForever::create(Sequence::create(actionTo, actionBack, NULL));
         this->runAction(actionRep);
 
-        auto actionMoveTo1 = MoveBy::create(0.02f, Point(1, 1));
-        auto actionMoveTo2 = MoveBy::create(0.02f, Point(1, -1));
-        auto actionMoveTo3 = MoveBy::create(0.02f, Point(-1, -1));
-        auto actionMoveTo4 = MoveBy::create(0.02f, Point(-1, 1));
+        auto actionMoveTo1 = MoveBy::create(fLoop, Point(fWidth, fWidth));
+        auto actionMoveTo2 = MoveBy::create(fLoop, Point(fWidth, -fWidth));
+        auto actionMoveTo3 = MoveBy::create(fLoop, Point(-fWidth, -fWidth));
+        auto actionMoveTo4 = MoveBy::create(fLoop, Point(-fWidth, fWidth));
         auto actionRep2 = RepeatForever::create(Sequence::create(actionMoveTo1, actionMoveTo2, actionMoveTo3, actionMoveTo4, NULL));
         this->runAction(actionRep2);
 
         this->position = getPosition();
         log("chess z order %d, vertex.z %f", this->getLocalZOrder(), this->getPositionZ());
-        this->setLocalZOrder(2000);
+        this->setLocalZOrder(Z_TOP_CHESS);
     }
     return ret;
 }
@@ -91,15 +98,19 @@ void ChessSprite::onTouchMoved(Touch* touch, Event* event)
 void ChessSprite::onTouchEnded(Touch* touch, Event* event)
 {
     this->stopAllActions();
-    this->setLocalZOrder(1);
+    this->setLocalZOrder(Z_BOTTOM_CHESS);
 
     //将touch坐标初始化为屏幕坐标系
     Point point = touch->getLocation();
     point.y = Director::getInstance()->getOpenGLView()->getFrameSize().height - point.y;
 
+    //取尺寸配置
+    Size& sizeBox = Config::getBoxSize();
+    Size& sizeEdge = Config::getEdgeSize();
+
     //计算落点的坐标
-    UINT uiX = (point.x - 18.0) / 60.0 + 1;
-    UINT uiY = (point.y - 20.0) / 60.0 + 1;
+    UINT uiX = (point.x - sizeEdge.width) / sizeBox.width + 1;
+    UINT uiY = (point.y - sizeEdge.height) / sizeBox.height + 1;
     log("compute chess target %d %d", uiX, uiY);
 
     //判断落点合法性
@@ -111,8 +122,8 @@ void ChessSprite::onTouchEnded(Touch* touch, Event* event)
 
     //检查落点的匹配区间
     Point toPoint;
-    toPoint.x = (uiX - 1) * 60 + 48;
-    toPoint.y = (uiY - 1) * 60 + 50;
+    toPoint.x = (uiX - 1) * sizeBox.width + sizeBox.width * 0.5 + sizeEdge.width;
+    toPoint.y = (uiY - 1) * sizeBox.height + sizeBox.height * 0.5 + sizeEdge.height;
     log("target point %f %f", toPoint.x, toPoint.y);
     log("touch point %f %f", point.x, point.y);
     if (15.0 < toPoint.getDistance(point))
@@ -131,7 +142,8 @@ void ChessSprite::onTouchEnded(Touch* touch, Event* event)
 
     //可以落子
     toPoint.y = Director::getInstance()->getOpenGLView()->getFrameSize().height - toPoint.y;
-    this->setPosition(toPoint.x + 2.0 * CCRANDOM_MINUS1_1(), toPoint.y + 2.0 * CCRANDOM_MINUS1_1());
+    float fOffset = Config::getChessJitter().fOffset;
+    this->setPosition(toPoint.x + fOffset * CCRANDOM_MINUS1_1(), toPoint.y + fOffset * CCRANDOM_MINUS1_1());
 
     //由棋局进行局面处理
     GameScene::getGameScene()->moveChess(uiChessId, uiX, uiY);

@@ -6,12 +6,6 @@
 USING_NS_CC;
 using namespace cocos2d::network;
 
-/*char* apstrColor[3] = {
-    (char*)"invalid",
-    (char*)"Black",
-    (char*)"Red"
-};*/
-
 UINT g_uiNetId = 0;
 
 GameSceneNet::GameSceneNet()
@@ -32,15 +26,15 @@ bool GameSceneNet::init(void)
 {
 	GameScene::init();
 
-    this->pNetLabel = Label::createWithTTF(CF_S("netinfo_loading"), Config::getFilename("fonts_cn"), 20);
+    this->pNetLabel = Label::createWithTTF(CF_S("netinfo_loading"), Config::getFilename("fonts_cn"), CF_FT("font_info"));
     this->pInfoGround->addChild(this->pNetLabel);
-    this->pNetLabel->setPosition(this->pInfoGround->getContentSize().width * 0.5, this->pInfoGround->getContentSize().height - 80);
+    this->pNetLabel->setPosition(this->pInfoGround->getContentSize().width * 0.5, this->pInfoGround->getContentSize().height * CF_P("pos_game_netinfo"));
 
     this->strServerHost = std::string("http://192.168.1.176:9090/");
     this->uiNetId = g_uiNetId;
     if (0 != this->uiNetId)
     {
-        this->schedule(schedule_selector(GameSceneNet::getOppenetIdFromServer), 3.0f);
+        this->schedule(schedule_selector(GameSceneNet::getOppenetIdFromServer), CF_T("timer_netgame_normal"));
         this->setNetLabel(CF_S("netinfo_wait_oppo").c_str(), Color3B::BLUE);
     }
     else
@@ -87,9 +81,12 @@ bool GameSceneNet::checkChessMoveIsValid(UINT uiChessId, UINT uiPosY, UINT uiPos
 
 void GameSceneNet::moveChessSelf(UINT uiChessId, UINT uiPosX, UINT uiPosY)
 {
+    Size& sizeBox = Config::getBoxSize();
+    Size& sizeEdge = Config::getEdgeSize();
+
     Point toPoint;
-    toPoint.x = (uiPosX - 1) * 60 + 48;
-    toPoint.y = (uiPosY - 1) * 60 + 50;
+    toPoint.x = (uiPosX - 1) * sizeBox.width + sizeBox.width * 0.5 + sizeEdge.width;
+    toPoint.y = (uiPosY - 1) * sizeBox.height + sizeBox.height * 0.5 + sizeEdge.height;
     toPoint.y = Director::getInstance()->getOpenGLView()->getFrameSize().height - toPoint.y;
 
     auto pChess = this->getChildByTag(CHESS_TAG_BASE + uiChessId);
@@ -103,7 +100,7 @@ void GameSceneNet::moveChess(UINT uiChessId, UINT uiPosY, UINT uiPosX)
 
     GameScene::moveChess(uiChessId, uiPosY, uiPosX);
 
-    this->schedule(schedule_selector(GameSceneNet::receiveMoveFromServerTimerBack), 3.0f);
+    this->schedule(schedule_selector(GameSceneNet::receiveMoveFromServerTimerBack), CF_T("timer_netgame_normal"));
 	return;
 }
 
@@ -166,7 +163,7 @@ void GameSceneNet::receiveMoveFromServer(HttpClient* client, HttpResponse* respo
     }
     else
     {
-        this->schedule(schedule_selector(GameSceneNet::receiveMoveFromServerTimerBack), 1.0f);
+        this->schedule(schedule_selector(GameSceneNet::receiveMoveFromServerTimerBack), CF_T("timer_netgame_short"));
     }
 
     if (0 == uiLive)
@@ -231,7 +228,7 @@ void GameSceneNet::receiveOpponentIdFromServer(HttpClient* client, HttpResponse*
 
         if (CHESSCOCLOR_RED == uiReadColor)
         {
-            this->schedule(schedule_selector(GameSceneNet::receiveMoveFromServerTimerBack), 1.0f);
+            this->schedule(schedule_selector(GameSceneNet::receiveMoveFromServerTimerBack), CF_T("timer_netgame_short"));
         }
         this->setLastMoveColor(CHESSCOCLOR_RED);
 

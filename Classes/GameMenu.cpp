@@ -19,38 +19,36 @@ GameMenu::~GameMenu()
 
 bool GameMenu::init(void)
 {
+    Size sizeWin = Director::getInstance()->getWinSize();
+
     Menu* pItemMenu = Menu::create();
 
     //TTFConfig ttfConfig(CF_F("fonts_en").c_str(), 48);
-    TTFConfig ttfConfig2(CF_F("fonts_cn").c_str(), 48);
+    TTFConfig ttfConfig2(CF_F("fonts_cn").c_str(), CF_FT("font_menu"));
 
     auto label = Label::createWithTTF(ttfConfig2, CF_S("label_normal_start"));
     MenuItemLabel* pMenuItem = MenuItemLabel::create(label, CC_CALLBACK_1(GameMenu::menuNormalGameCallback, this));
 
     auto labelInput = Label::createWithTTF(ttfConfig2, CF_S("label_login"));
-    MenuItemLabel* pMenuInput = MenuItemLabel::create(labelInput, CC_CALLBACK_1(GameMenu::menuInputId, this));
-
-    auto labelNetPost = Label::createWithTTF(ttfConfig2, "netPostTest");
-    MenuItemLabel* pMenuItemNetPostTest = MenuItemLabel::create(labelNetPost, CC_CALLBACK_1(GameMenu::onMenuPostTestClicked, this));
+    MenuItemLabel* pMenuInput = MenuItemLabel::create(labelInput, CC_CALLBACK_1(GameMenu::menuUserLoginCallback, this));
 
     auto labelLan = Label::createWithTTF(ttfConfig2, CF_S("label_net_start"));
     MenuItemLabel* pMenuItemLanTest = MenuItemLabel::create(labelLan, CC_CALLBACK_1(GameMenu::menuNetGameCallback, this));
 
     pItemMenu->addChild(pMenuItem);
 	pItemMenu->addChild(pMenuInput);
-	//pItemMenu->addChild(pMenuItemNetPostTest);
 	pItemMenu->addChild(pMenuItemLanTest);
-	pMenuItem->setPosition(0, 0);
-    pMenuInput->setPosition(0, 80);
-	pMenuItemLanTest->setPosition(0, 160);
-	pMenuItemNetPostTest->setPosition(0, 240);
+	pMenuItem->setPosition(0, sizeWin.height * CF_P("pos_main_start"));
+    pMenuInput->setPosition(0, sizeWin.height * CF_P("pos_main_login"));
+	pMenuItemLanTest->setPosition(0, sizeWin.height * CF_P("pos_main_netstart"));
 
+    pItemMenu->setPositionY(0);
     this->addChild(pItemMenu);
 
     MenuItemImage *pCloseItem = MenuItemImage::create(CF_F("image_closeNormal"), CF_F("image_closeSelect"),
         CC_CALLBACK_1(GameMenu::menuCloseCallback, this));
     Menu* pCloseMenu = Menu::create(pCloseItem, NULL);
-    pCloseMenu->setPositionY(200);
+    pCloseMenu->setPositionY(sizeWin.height * CF_P("pos_main_close"));
     this->addChild(pCloseMenu);
 
 	return true;
@@ -94,24 +92,9 @@ void GameMenu::menuCloseCallback(Ref* pSender)
 #endif
 }
 
-void GameMenu::menuInputId(Ref* pSender)
+void GameMenu::menuUserLoginCallback(Ref* pSender)
 {
     CCDirector::getInstance()->replaceScene(Login::scene());
 
     return;
-}
-
-void GameMenu::onMenuPostTestClicked(Ref* pSender)
-{
-    HttpRequest* request = new HttpRequest();
-	request->setUrl("http://192.168.1.176:9090/newIdGet");
-    request->setRequestType(HttpRequest::Type::POST);
-
-	// write the post data
-	char postData[22] = "uiChessId=22";
-	request->setRequestData(postData, 22);
-
-	request->setTag("POST test1");
-    HttpClient::getInstance()->send(request);
-	request->release();
 }

@@ -57,7 +57,6 @@ Rect arrayChessImageText[CHESSID_MAX] = {
 	Rect(650, 0, 50, 50)		//CHESSID_PAWN_RED_5,
 };
 
-
 GameScene::~GameScene()
 {
     if (NULL != this->pChessGame)
@@ -78,20 +77,21 @@ bool GameScene::init(void)
     CreateChesses();
 
     Menu* pItemMenu = Menu::create();
-    auto labelClose = Label::createWithTTF(CF_S("label_exit_game"), CF_F("fonts_cn"), 18);
+    auto labelClose = Label::createWithTTF(CF_S("label_exit_game"), CF_F("fonts_cn"), CF_FT("font_menu_small"));
     MenuItemLabel* pMenuClose = MenuItemLabel::create(labelClose, CC_CALLBACK_1(GameScene::menuCloseGame, this));
     pItemMenu->addChild(pMenuClose);
-    pItemMenu->setPosition(60, 15);
+    pItemMenu->setPosition(size.width * CF_P("pos_game_close_w"), size.height * CF_P("pos_game_close_h"));
     this->addChild(pItemMenu);
 
     this->pInfoGround = Sprite::create(CF_F("image_InfoBack"));
     this->pInfoGround->setPosition(GameGround->getContentSize().width + this->pInfoGround->getContentSize().width * 0.5, size.height * 0.5);
     this->addChild(pInfoGround, 0);
 
-    this->pTurnLabel = Label::createWithTTF(CF_S("info_start_both_turn"), CF_F("fonts_cn"), 20);
+    this->pTurnLabel = Label::createWithTTF(CF_S("info_start_both_turn"), CF_F("fonts_cn"), CF_FT("font_info"));
     this->pTurnLabel->setColor(Color3B::BLACK);
     this->pInfoGround->addChild(this->pTurnLabel);
-    this->pTurnLabel->setPosition(this->pInfoGround->getContentSize().width * 0.5, this->pInfoGround->getContentSize().height - 30);
+    this->pTurnLabel->setPosition(this->pInfoGround->getContentSize().width * 0.5,
+                                    this->pInfoGround->getContentSize().height * CF_P("pos_game_info"));
 
     CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic(CF_F("music_back").c_str());
     SimpleAudioEngine::getInstance()->playBackgroundMusic(CF_F("music_back").c_str(), true);
@@ -117,6 +117,8 @@ void GameScene::CreateChesses(void)
     std::vector<std::vector<UINT> > vecMatrix = this->pChessGame->GetMatrix();
     auto pSpriteText = Director::getInstance()->getTextureCache()->addImage(CF_F("image_Chesses"));
     float fHeight = Director::getInstance()->getOpenGLView()->getFrameSize().height;
+    Size& sizeBox = Config::getBoxSize();
+    Size& sizeEdge = Config::getEdgeSize();
     for (UINT uiLine = 1; uiLine <= CHESS_DATA_LINES; uiLine++)
     {
         for (UINT uiIndex = 1; uiIndex <= CHESS_DATA_COLUMN; uiIndex++)
@@ -127,11 +129,12 @@ void GameScene::CreateChesses(void)
             }
             UINT uiId = this->pChessGame->GetChessID(uiLine, uiIndex);
 			ChessSprite *pChess = ChessSprite::createWithTexture(pSpriteText, arrayChessImageText[uiId]);
-			Point point = Point(-12 + 60 * uiIndex, -10 + 60 * uiLine);
+			Point point = Point(sizeBox.width * uiIndex - sizeBox.width * 0.5 + sizeEdge.width,
+                                sizeBox.height * uiLine - sizeBox.height * 0.5 + sizeEdge.height);
             point.y = fHeight - point.y;
             pChess->setPosition(point);
             pChess->setChessId(uiId);
-            this->addChild(pChess, uiLine * 4 + uiIndex, CHESS_TAG_BASE + uiId);
+            this->addChild(pChess, uiLine * 9 + uiIndex, CHESS_TAG_BASE + uiId);
         }
     }
 
@@ -209,11 +212,14 @@ void GameScene::moveChessToTrash(UINT uiChessId)
     auto pSpriteText = Director::getInstance()->getTextureCache()->getTextureForKey(CF_F("image_Chesses"));
     auto pNewChess = ChessSprite::createWithTexture(pSpriteText, arrayChessImageText[uiChessId]);
 
+    Size& sizeChess = Config::getChessSize();
+
     UINT uiIndex = this->uiTrashNum / 4;
     UINT uiJndex = this->uiTrashNum % 4;
-    pNewChess->setPosition(52 * uiJndex + 35, 52 * uiIndex + 45);
+    pNewChess->setPosition((sizeChess.width + 2) * uiJndex + sizeChess.width * 0.7,
+                            (sizeChess.height + 2) * uiIndex + sizeChess.height * 0.9);
 
-    pNewChess->setRotation(20 * CCRANDOM_MINUS1_1());
+    pNewChess->setRotation(Config::getChessJitter().fAngle * 2 * CCRANDOM_MINUS1_1());
     this->pInfoGround->addChild(pNewChess);
 
     this->uiTrashNum += 1;

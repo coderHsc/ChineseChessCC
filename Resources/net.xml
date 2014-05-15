@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<array>
+    <dict>
+        <key>host</key>
+        <string>http://192.168.1.176:9090</string>
+    </dict>
+    <dict>
+    	<key>path_register</key>
+    	<string>/regUser</string>
+    	<key>path_login</key>
+    	<string>/login</string>
+        <key>path_move_send</key>
+        <string>/chessMove</string>
+        <key>path_move_get</key>
+        <string>/chessMoveGet</string>
+        <key>path_match_oppo</key>
+        <string>/findOpponent</string>
+        <key>path_leave_game</key>
+        <string>/leaveGame</string>
+    </dict>
+</array>
+</plist>

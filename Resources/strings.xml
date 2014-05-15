@@ -4,11 +4,65 @@
 <array>
     <dict>
         <key>label_login</key>
-        <string>登录</string>
+        <string>用户登录</string>
         <key>label_normal_start</key>
         <string>单机游戏</string>
         <key>label_net_start</key>
         <string>联机游戏</string>
+        <key>label_exit_game</key>
+        <string>退出游戏</string>
+        <key>label_return</key>
+        <string>返回</string>
+        <key>label_login_login</key>
+        <string>登录</string>
+        <key>label_login_register</key>
+        <string>注册</string>
+        <key>label_login_please</key>
+        <string>请登录/注册</string>
+    </dict>
+    <dict>
+    	<key>info_start_both_turn</key>
+    	<string>任意方先行</string>
+    	<key>info_black_turn</key>
+    	<string>轮到黑方了</string>
+    	<key>info_black_win</key>
+    	<string>黑方胜利</string>
+    	<key>info_red_turn</key>
+    	<string>轮到红方了</string>
+    	<key>info_red_win</key>
+    	<string>红方胜利</string>
+    </dict>
+    <dict>
+    	<key>netinfo_loading</key>
+    	<string>正在连接</string>
+    	<key>netinfo_no_login</key>
+    	<string>未登录\n游戏开始不能</string>
+    	<key>netinfo_wait_oppo</key>
+    	<string>等待对手</string>
+    	<key>netinfo_oppo_leave</key>
+    	<string>对手离开了游戏</string>
+    	<key>netinfo_local_black</key>
+    	<string>本方执黑</string>
+    	<key>netinfo_local_red</key>
+    	<string>本方执红</string>
+    	<key>netinfo_oppo_name</key>
+    	<string>对手</string>
+    </dict>
+    <dict>
+    	<key>userinfo_login_succeed</key>
+    	<string>登录成功</string>
+    	<key>userinfo_login_failed</key>
+    	<string>登录失败</string>
+    	<key>userinfo_register_succeed</key>
+    	<string>注册成功</string>
+    	<key>userinfo_register_failed</key>
+    	<string>注册失败</string>
+    	<key>userinfo_username</key>
+    	<string>用户名</string>
+    	<key>userinfo_general_score</key>
+    	<string>总积分</string>
+    	<key>userinfo_general_times</key>
+    	<string>总场次</string>
     </dict>
 </array>
 </plist>

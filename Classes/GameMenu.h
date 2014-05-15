@@ -11,8 +11,7 @@ public:
     ~GameMenu();
 
     void menuNormalGameCallback(Ref* pSender);
-    void menuInputId(Ref* pSender);
-    void onMenuPostTestClicked(Ref* pSender);
+    void menuUserLoginCallback(Ref* pSender);
     void menuNetGameCallback(Ref* pSender);
 
     void menuCloseCallback(Ref* pSender);

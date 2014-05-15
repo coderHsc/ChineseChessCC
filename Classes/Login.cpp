@@ -31,20 +31,21 @@ bool Login::init(void)
 
     Menu* pItemMenu = Menu::create();
 
-    TTFConfig ttfConfig(CF_F("fonts_cn").c_str(), 48);
+    TTFConfig ttfConfig(CF_F("fonts_cn").c_str(), CF_FT("font_menu"));
 
     auto pLabelLogin = Label::createWithTTF(ttfConfig, CF_S("label_login_login"));
     MenuItemLabel* pMenuItemLogin = MenuItemLabel::create(pLabelLogin, CC_CALLBACK_1(Login::menuLoginOk, this));
 
     pItemMenu->addChild(pMenuItemLogin);
-    pMenuItemLogin->setPosition(-100, -200);
+    pMenuItemLogin->setPosition(size.width * CF_P("pos_login_login_w"), size.height * CF_P("pos_login_login_h"));
 
     auto pLabelReg = Label::createWithTTF(ttfConfig, CF_S("label_login_register"));
     MenuItemLabel* pMenuItemReg = MenuItemLabel::create(pLabelReg, CC_CALLBACK_1(Login::menuRegOk, this));
 
     pItemMenu->addChild(pMenuItemReg);
-    pMenuItemReg->setPosition(100, -200);
+    pMenuItemReg->setPosition(size.width * CF_P("pos_login_reg_w"), size.height * CF_P("pos_login_reg_h"));
 
+    pItemMenu->setPosition(0, 0);
     this->addChild(pItemMenu);
 
     auto listener = EventListenerTouchOneByOne::create();
@@ -52,24 +53,24 @@ bool Login::init(void)
     listener->onTouchEnded = CC_CALLBACK_2(Login::onTouchEnded, this);
     _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
 
-    _pTextFieldUserName = TextFieldTTF::textFieldWithPlaceHolder("<click here for input>", CF_F("fonts_en"), 30);
+    _pTextFieldUserName = TextFieldTTF::textFieldWithPlaceHolder("<click here for input>", CF_F("fonts_en"), CF_FT("font_input"));
     this->addChild(_pTextFieldUserName);
-    _pTextFieldUserName->setPosition(size.width * 0.5, size.height * 0.5 + 40);
+    _pTextFieldUserName->setPosition(size.width * 0.5, size.height * CF_P("pos_login_user"));
 
-    _pTextFieldPasswd = TextFieldTTF::textFieldWithPlaceHolder("<click here for input>", CF_F("fonts_en"), 30);
+    _pTextFieldPasswd = TextFieldTTF::textFieldWithPlaceHolder("<click here for input>", CF_F("fonts_en"), CF_FT("font_input"));
     this->addChild(_pTextFieldPasswd);
-    _pTextFieldPasswd->setPosition(size.width * 0.5, size.height * 0.5 - 20);
+    _pTextFieldPasswd->setPosition(size.width * 0.5, size.height * CF_P("pos_login_pwd"));
     _pTextFieldPasswd->setSecureTextEntry(true);
 
-    _pInfoLabel = Label::createWithTTF(CF_S("label_login_please"), CF_F("fonts_cn"), 48);
+    _pInfoLabel = Label::createWithTTF(CF_S("label_login_please"), CF_F("fonts_cn"), CF_FT("font_menu"));
     this->addChild(_pInfoLabel);
-    _pInfoLabel->setPosition(size.width * 0.5, size.height * 0.5 + 190);
+    _pInfoLabel->setPosition(size.width * 0.5, size.height * CF_P("pos_login_info"));
 
     Menu* pItemMenuClose = Menu::create();
-    auto labelClose = Label::createWithTTF(CF_S("label_return"), CF_F("fonts_cn"), 20);
+    auto labelClose = Label::createWithTTF(CF_S("label_return"), CF_F("fonts_cn"), CF_FT("font_info"));
     MenuItemLabel* pMenuClose = MenuItemLabel::create(labelClose, CC_CALLBACK_1(Login::menuClose, this));
     pItemMenuClose->addChild(pMenuClose);
-    pItemMenuClose->setPosition(60, 15);
+    pItemMenuClose->setPosition(size.width * CF_P("pos_login_return_w"), size.height * CF_P("pos_login_return_h"));
     this->addChild(pItemMenuClose);
 
     this->strServerHost = std::string("http://192.168.1.176:9090/");
@@ -144,6 +145,7 @@ void Login::receiveRegResult(HttpClient* client, HttpResponse* response)
     {
         log("response failed in receiveRegResult");
         log("error buffer: %s", response->getErrorBuffer());
+        response->getHttpRequest()->release();
         return;
     }
 
@@ -184,6 +186,7 @@ void Login::receiveLoginResult(HttpClient* client, HttpResponse* response)
     {
         log("response failed in receiveLoginResult");
         log("error buffer: %s", response->getErrorBuffer());
+        response->getHttpRequest()->release();
         return;
     }
 
