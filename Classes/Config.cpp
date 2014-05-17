@@ -41,7 +41,8 @@ bool Config::init()
         for (auto& text_map_pair : text_map)
         {
             Config::mStrings[text_map_pair.first] = text_map_pair.second.asString();
-            log("read config : key %s, string %s.", text_map_pair.first.c_str(), text_map_pair.second.asString().c_str());
+            log("read config : key %s, string %s(%d).", text_map_pair.first.c_str(), text_map_pair.second.asString().c_str(),
+                strlen(text_map_pair.second.asString().c_str()));
         }
     }
 
@@ -62,7 +63,7 @@ bool Config::init()
         auto text_map = value.asValueMap();
         for (auto& text_map_pair : text_map)
         {
-            log("read config : key %s, value %f.", text_map_pair.first.c_str(), text_map_pair.second.asString().c_str());
+            log("read config : key %s, value %s.", text_map_pair.first.c_str(), text_map_pair.second.asString().c_str());
             Config::_mNetPath[text_map_pair.first] = text_map_pair.second.asString();
         }
     }
@@ -111,6 +112,18 @@ void Config::procOneSizeConfig(std::string strIndex, float fValue)
     else if (0 == strIndex.compare("chess_jitter_offset"))
     {
         Config::_stChessJitter.fOffset = fValue;
+    }
+    else if (0 == strIndex.compare("chess_scale_extent"))
+    {
+        Config::_stChessJitter.fScaleExtent = fValue;
+    }
+    else if (0 == strIndex.compare("chess_scale_to"))
+    {
+        Config::_stChessJitter.fScaleTo = fValue;
+    }
+    else if (0 == strIndex.compare("chess_scale_back"))
+    {
+        Config::_stChessJitter.fScaleBack = fValue;
     }
     else if (std::string::npos != strIndex.find("font"))
     {

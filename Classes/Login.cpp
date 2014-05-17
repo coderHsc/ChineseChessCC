@@ -155,8 +155,7 @@ void Login::receiveRegResult(HttpClient* client, HttpResponse* response)
     log("receive register result %s", strBuff.c_str());
 
     UINT uiReadId = 0;
-    char aucRetBuf[256] = { 0 };
-    sscanf(strBuff.c_str(), "ret=%s uid=%d", aucRetBuf, &uiReadId);
+    sscanf(strBuff.c_str(), "uid=%d", &uiReadId);
 
     if (0 == uiReadId)
     {
@@ -196,8 +195,7 @@ void Login::receiveLoginResult(HttpClient* client, HttpResponse* response)
     log("receive login result %s", strBuff.c_str());
 
     UINT uiReadId = 0;
-    char aucRetBuf[256] = { 0 };
-    sscanf(strBuff.c_str(), "ret=%s uid=%d", aucRetBuf, &uiReadId);
+    sscanf(strBuff.c_str(), "uid=%d", &uiReadId);
 
     if (0 == uiReadId)
     {

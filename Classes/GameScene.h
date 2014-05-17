@@ -38,6 +38,11 @@ private:
 	void CreateChesses(void);
 	void resetChessGame();
 
+    void chessCheckmate(void);
+    void kingBeCheckmate(UINT uiChessId);
+    void kingUnBeCheckmate(UINT uiChessId);
+    void checkmateKing(UINT uiChessId);
+    void unCheckmateKing(UINT uiChessId);
     void moveChessToTrash(UINT uiChessId);
 
 	ChessGame* pChessGame;

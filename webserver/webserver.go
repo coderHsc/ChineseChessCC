@@ -174,22 +174,22 @@ func netCreateNewUser(w http.ResponseWriter, r *http.Request) {
 
 	//检查用户名和口令的合法性
 	if 3 > len(strUser) {
-		fmt.Fprintf(w, "ret=failed uid=0 reason %s", "invalid username")
+		fmt.Fprintf(w, "uid=0 reason %s", "invalid username")
 		return
 	}
 	if 3 > len(strPwd) {
-		fmt.Fprintf(w, "ret=failed uid=0 reason %s", "invalid password")
+		fmt.Fprintf(w, "uid=0 reason %s", "invalid password")
 		return
 	}
 
 	//尝试向数据库注册用户
 	iUid, strRet := toolsql.CreateUser(strUser, strPwd)
 	if 0 == iUid {
-		fmt.Fprintf(w, "ret=failed uid=0 reason %s", strRet)
+		fmt.Fprintf(w, "uid=0 reason %s", strRet)
 		return
 	}
 
-	fmt.Fprintf(w, "ret=success uid=%d reason", iUid)
+	fmt.Fprintf(w, "uid=%d reason", iUid)
 	log.Println("create new user", iUid)
 }
 
@@ -215,7 +215,7 @@ func netUserLogin(w http.ResponseWriter, r *http.Request) {
 
 	iUid, strRet := toolsql.GetUserId(strUser, strPwd)
 	if 0 == iUid {
-		fmt.Fprintf(w, "ret=failed uid=0 reason %s", strRet)
+		fmt.Fprintf(w, "uid=0 reason %s", strRet)
 		return
 	}
 
@@ -228,7 +228,7 @@ func netUserLogin(w http.ResponseWriter, r *http.Request) {
 		log.Println("create new userdata")
 	}
 
-	fmt.Fprintf(w, "ret=success uid=%d reason", iUid)
+	fmt.Fprintf(w, "uid=%d reason", iUid)
 	log.Println("user", iUid, "login")
 }
 

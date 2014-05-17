@@ -25,6 +25,12 @@
         <string>0.02</string>
         <key>chess_jitter_offset</key>
         <string>2.0</string>
+        <key>chess_scale_extent</key>
+        <string>1.2</string>
+        <key>chess_scale_to</key>
+        <string>0.2</string>
+        <key>chess_scale_back</key>
+        <string>0.1</string>
     </dict>
     <dict>
         <key>font_menu</key>

@@ -7,6 +7,8 @@
 USING_NS_CC;
 using namespace CocosDenshion;
 
+#define TAG_ACTION_KINGBECHECKMATE  10000 //and 10001
+
 GameScene* GameScene::pGameScene = NULL;
 
 GameScene::GameScene()
@@ -200,8 +202,128 @@ void GameScene::moveChess(UINT uiChessId, UINT uiPosY, UINT uiPosX)
     {
         this->setGameWin();
     }
+    else
+    {
+        //将军判断和处理
+        chessCheckmate();
+    }
 
     return;
+}
+
+void GameScene::chessCheckmate(void)
+{
+    auto redKing = this->pChessGame->GetChessPos(CHESSID_KING_RED);
+    auto blackKing = this->pChessGame->GetChessPos(CHESSID_KING_BLACK);
+    bool redCheck = false;
+    bool blackCheck = false;
+    for (UINT uiIndex = CHESSID_MIN + 1; uiIndex < CHESSID_MAX; uiIndex++)
+    {
+        if (true == this->pChessGame->CheckChessMoveValid(uiIndex, redKing.first, redKing.second))
+        {
+            checkmateKing(uiIndex);
+            redCheck = true;
+        }
+        else if (true == this->pChessGame->CheckChessMoveValid(uiIndex, blackKing.first, blackKing.second))
+        {
+            checkmateKing(uiIndex);
+            blackCheck = true;
+        }
+        else
+        {
+            unCheckmateKing(uiIndex);
+        }
+    }
+
+    if (true == redCheck)
+    {
+        this->kingBeCheckmate(CHESSID_KING_RED);
+    }
+    else
+    {
+        this->kingUnBeCheckmate(CHESSID_KING_RED);
+    }
+
+    if (true == blackCheck)
+    {
+        this->kingBeCheckmate(CHESSID_KING_BLACK);
+    }
+    else
+    {
+        this->kingUnBeCheckmate(CHESSID_KING_BLACK);
+    }
+}
+
+void GameScene::kingBeCheckmate(UINT uiChessId)
+{
+    auto pChess = this->getChildByTag(CHESS_TAG_BASE + uiChessId);
+    auto actionKing = pChess->getActionByTag(TAG_ACTION_KINGBECHECKMATE);
+    if (nullptr != actionKing)
+    {
+        return;
+    }
+
+    float fWidth = Config::getChessJitter().fWidth;
+    float fAngle = Config::getChessJitter().fAngle;
+    float fLoop = Config::getChessJitter().fLoop;
+    auto actionTo = RotateTo::create(fLoop, fAngle);
+    auto actionBack = RotateTo::create(fLoop, -fAngle);
+    auto actionRep = RepeatForever::create(Sequence::create(actionTo, actionBack, NULL));
+    actionRep->setTag(TAG_ACTION_KINGBECHECKMATE);
+    pChess->runAction(actionRep);
+
+    auto actionMoveTo1 = MoveBy::create(fLoop, Point(fWidth, fWidth));
+    auto actionMoveTo2 = MoveBy::create(fLoop, Point(fWidth, -fWidth));
+    auto actionMoveTo3 = MoveBy::create(fLoop, Point(-fWidth, -fWidth));
+    auto actionMoveTo4 = MoveBy::create(fLoop, Point(-fWidth, fWidth));
+    auto actionRep2 = RepeatForever::create(Sequence::create(actionMoveTo1, actionMoveTo2, actionMoveTo3, actionMoveTo4, NULL));
+    actionRep2->setTag(TAG_ACTION_KINGBECHECKMATE + 1);
+    pChess->runAction(actionRep2);
+
+    return;
+}
+
+void GameScene::kingUnBeCheckmate(UINT uiChessId)
+{
+    auto pChess = this->getChildByTag(CHESS_TAG_BASE + uiChessId);
+    auto actionKing = pChess->getActionByTag(TAG_ACTION_KINGBECHECKMATE);
+    if (nullptr == actionKing)
+    {
+        return;
+    }
+
+    pChess->stopActionByTag(TAG_ACTION_KINGBECHECKMATE);
+    pChess->stopActionByTag(TAG_ACTION_KINGBECHECKMATE + 1);
+
+    return;
+}
+
+void GameScene::checkmateKing(UINT uiChessId)
+{
+    auto pChess = this->getChildByTag(CHESS_TAG_BASE + uiChessId);
+    if (nullptr == pChess)
+    {
+        return;
+    }
+
+    pChess->runAction(ScaleTo::create(Config::getChessJitter().fScaleTo, Config::getChessJitter().fScaleExtent));
+
+    return;
+}
+
+void GameScene::unCheckmateKing(UINT uiChessId)
+{
+    auto pChess = this->getChildByTag(CHESS_TAG_BASE + uiChessId);
+    if (nullptr == pChess)
+    {
+        return;
+    }
+
+    if (1.0f != pChess->getScale())
+    {
+        pChess->stopAllActions();
+        pChess->runAction(ScaleTo::create(Config::getChessJitter().fScaleTo, 1.0f));
+    }
 }
 
 void GameScene::moveChessToTrash(UINT uiChessId)

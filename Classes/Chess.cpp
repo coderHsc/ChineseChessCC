@@ -528,7 +528,7 @@ void ChessPieces::SetPos(uint uiPosX, uint uiPosY)
 
 void ChessPieces::SetAlive(bool bIsAlive)
 {
-    bIsAlive = bIsAlive;
+    this->bIsAlive = bIsAlive;
 
     if (false == bIsAlive)
     {
@@ -701,7 +701,15 @@ vector<pair<uint, uint> > ChessGame::GetChessProbPos(uint uiChessId) const
     }
     else
     {
-        return it->second.GetProbPos(vecMatrix);
+        if (false == it->second.IsAlive())
+        {
+            vector<pair<uint, uint> > vecr;
+            return vecr;
+        }
+        else
+        {
+            return it->second.GetProbPos(vecMatrix);
+        }
     }
 }
 

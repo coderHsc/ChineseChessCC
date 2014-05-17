@@ -86,7 +86,7 @@ func GetUserId(strUser, passwd string) (int, string) {
 	return iUid1, "ok"
 }
 
-func CreateUser(strUser, passwd string) (int, string) {
+func CreateUser(strUser, strPasswd string) (int, string) {
 	//检查数据库已初始化
 	if nil == g_db {
 		log.Panicln("database error: no init")
@@ -125,7 +125,7 @@ func CreateUser(strUser, passwd string) (int, string) {
 	tNow := time.Now()
 	strDate := fmt.Sprintf("%.10s", tNow.String())
 	strDateTime := fmt.Sprintf("%.19s", tNow.String())
-	res, err := stmt.Exec(strUser, passwd, strDate, strDateTime)
+	res, err := stmt.Exec(strUser, strPasswd, strDate, strDateTime)
 	if nil != err {
 		log.Panicln("database error: insert ->", err)
 		return 0, "database error"

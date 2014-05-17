@@ -15,6 +15,9 @@ struct CHESS_JITTER_ARRT {
 	float	fAngle;
 	float	fLoop;
 	float	fOffset;
+    float   fScaleExtent;
+    float   fScaleTo;
+    float   fScaleBack;
 };
 
 class Config

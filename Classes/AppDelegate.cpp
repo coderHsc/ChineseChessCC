@@ -22,6 +22,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
         glview = GLView::createWithRect("ChineseChessCC", Rect(0, 0, 800, 640), 1);
         director->setOpenGLView(glview);
     }
+    glview->setDesignResolutionSize(800, 640, ResolutionPolicy::SHOW_ALL);
 
     // turn on display FPS
     //director->setDisplayStats(true);

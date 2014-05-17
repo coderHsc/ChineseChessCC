@@ -64,5 +64,9 @@
     	<key>userinfo_general_times</key>
     	<string>总场次</string>
     </dict>
+    <dict>
+        <key>ttttest</key>
+        <string>世界</string>
+    </dict>
 </array>
 </plist>

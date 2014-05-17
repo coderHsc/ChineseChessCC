@@ -66,9 +66,9 @@ bool ChessSprite::onTouchBegan(Touch* touch, Event* event)
 
     if (true == ret)
     {
-        float fLoop = Config::getChessJitter().fLoop;
         float fWidth = Config::getChessJitter().fWidth;
         float fAngle = Config::getChessJitter().fAngle;
+        float fLoop = Config::getChessJitter().fLoop;
         auto actionTo = RotateTo::create(fLoop, fAngle);
         auto actionBack = RotateTo::create(fLoop, -fAngle);
         auto actionRep = RepeatForever::create(Sequence::create(actionTo, actionBack, NULL));
@@ -80,6 +80,9 @@ bool ChessSprite::onTouchBegan(Touch* touch, Event* event)
         auto actionMoveTo4 = MoveBy::create(fLoop, Point(-fWidth, fWidth));
         auto actionRep2 = RepeatForever::create(Sequence::create(actionMoveTo1, actionMoveTo2, actionMoveTo3, actionMoveTo4, NULL));
         this->runAction(actionRep2);
+
+        auto actionScale = ScaleBy::create(Config::getChessJitter().fScaleTo, Config::getChessJitter().fScaleExtent);
+        this->runAction(actionScale);
 
         this->position = getPosition();
         log("chess z order %d, vertex.z %f", this->getLocalZOrder(), this->getPositionZ());
@@ -99,6 +102,8 @@ void ChessSprite::onTouchEnded(Touch* touch, Event* event)
 {
     this->stopAllActions();
     this->setLocalZOrder(Z_BOTTOM_CHESS);
+    auto actionScale = ScaleBy::create(Config::getChessJitter().fScaleBack, Config::getChessJitter().fScaleExtent);
+    this->runAction(actionScale->reverse());
 
     //将touch坐标初始化为屏幕坐标系
     Point point = touch->getLocation();
