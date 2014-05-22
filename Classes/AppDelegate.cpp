@@ -2,6 +2,7 @@
 #include "GameMenu.h"
 #include "Config.h"
 #include "SimpleAudioEngine.h"
+#include "HttpClient.h"
 
 USING_NS_CC;
 using namespace CocosDenshion;
@@ -12,6 +13,7 @@ AppDelegate::AppDelegate() {
 
 AppDelegate::~AppDelegate()
 {
+    cocos2d::network::HttpClient::destroyInstance();
 }
 
 bool AppDelegate::applicationDidFinishLaunching() {
@@ -31,6 +33,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
     director->setAnimationInterval(1.0 / 60);
 
     Config::init();
+    FileUtils::getInstance()->addSearchResolutionsOrder("fonts");
 
     // create a scene. it's an autorelease object
     auto scene = GameMenu::scene();

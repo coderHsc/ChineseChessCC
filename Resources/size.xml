@@ -83,6 +83,8 @@
         <string>0.9</string>
         <key>pos_game_netinfo</key>
         <string>0.8</string>
+        <key>pos_game_opponame</key>
+        <string>0.75</string>
     </dict>
 </array>
 </plist>

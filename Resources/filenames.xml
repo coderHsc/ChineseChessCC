@@ -20,9 +20,9 @@
     </dict>
     <dict>
     	<key>fonts_cn</key>
-    	<string>fonts/simhei.ttf</string>
+    	<string>simhei.ttf</string>
     	<key>fonts_en</key>
-    	<string>fonts/arial.ttf</string>
+    	<string>arial.ttf</string>
     </dict>
 </array>
 </plist>

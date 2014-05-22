@@ -9,7 +9,7 @@ using namespace cocos2d::network;
 UINT g_uiNetId = 0;
 
 GameSceneNet::GameSceneNet()
-:uiNetId(0), bCanMove(false), pNetLabel(NULL), uiOpponentId(0), uiLocalColor(10000)
+:uiNetId(0), bCanMove(false), pNetLabel(NULL), strOppoName(""), uiLocalColor(10000)
 {
 }
 
@@ -94,15 +94,21 @@ void GameSceneNet::moveChessSelf(UINT uiChessId, UINT uiPosX, UINT uiPosY)
     pChess->setPosition(toPoint);
 }
 
-void GameSceneNet::moveChess(UINT uiChessId, UINT uiPosY, UINT uiPosX)
+bool GameSceneNet::moveChess(UINT uiChessId, UINT uiPosY, UINT uiPosX)
 {
 	log("GameSceneNet******move chess");
 	this->sendMoveToServer(uiChessId, uiPosY, uiPosX);
 
-    GameScene::moveChess(uiChessId, uiPosY, uiPosX);
+    if (true == GameScene::moveChess(uiChessId, uiPosY, uiPosX))
+    {
+        return true;
+    }
+    else
+    {
+        this->schedule(schedule_selector(GameSceneNet::receiveMoveFromServerTimerBack), CF_T("timer_netgame_normal"));
+        return false;
+    }
 
-    this->schedule(schedule_selector(GameSceneNet::receiveMoveFromServerTimerBack), CF_T("timer_netgame_normal"));
-	return;
 }
 
 void GameSceneNet::sendMoveToServer(UINT uiChessId, UINT uiPosY, UINT uiPosX)
@@ -113,7 +119,7 @@ void GameSceneNet::sendMoveToServer(UINT uiChessId, UINT uiPosY, UINT uiPosX)
     request->setRequestType(HttpRequest::Type::POST);
 
 	char aucBuf[256] = { 0 };
-	sprintf(aucBuf, "uiNetId=%d&moveinfo=%d-%d-%d", this->uiNetId, uiChessId, uiPosY, uiPosX);
+	sprintf(aucBuf, "uid=%d&chess=%d&posX=%d&posY=%d&ignore=0", this->uiNetId, uiChessId, uiPosY, uiPosX);
 	request->setRequestData(aucBuf, strlen(aucBuf) + 1);
 
 	request->setTag("POST chess move");
@@ -130,7 +136,7 @@ void GameSceneNet::receiveMoveFromServerTimerBack(float dt)
     request->setRequestType(HttpRequest::Type::POST);
     request->setResponseCallback(this, httpresponse_selector(GameSceneNet::receiveMoveFromServer));
     char aucBuf[256] = { 0 };
-    sprintf(aucBuf, "uiNetId=%d", this->uiNetId);
+    sprintf(aucBuf, "uid=%d&ignore=0", this->uiNetId);
     request->setRequestData(aucBuf, strlen(aucBuf) + 1);
     request->setTag("GET chess move");
 	HttpClient::getInstance()->send(request);
@@ -150,28 +156,30 @@ void GameSceneNet::receiveMoveFromServer(HttpClient* client, HttpResponse* respo
 
 	std::vector<char> *buffer = response->getResponseData();
 	std::string strBuff(buffer->begin(), buffer->end());
+    log("receive opponent move %s", strBuff.c_str());
 
-    UINT uiLive = 0;
-    UINT uiReadChess = 0;
-    UINT uiReadPosX = 0;
-    UINT uiReadPosY = 0;
-    sscanf(strBuff.c_str(), "%d-%d-%d-%d", &uiLive, &uiReadChess, &uiReadPosX, &uiReadPosY);
+    char aucBuf[256] = { 0 };
+    sscanf(strBuff.c_str(), "ret=%s ", aucBuf);
+    std::string strRet(aucBuf);
 
-    if (0 != uiReadChess)
-    {
-        GameSceneNet::moveChessSelf(uiReadChess, uiReadPosX, uiReadPosY);
-        GameScene::moveChess(uiReadChess, uiReadPosX, uiReadPosY);
-    }
-    else
+    if (0 == strRet.compare("nonew"))
     {
         this->schedule(schedule_selector(GameSceneNet::receiveMoveFromServerTimerBack), CF_T("timer_netgame_short"));
     }
-
-    if (0 == uiLive)
+    else if (0 == strRet.compare("oppoleave"))
     {
         this->bCanMove = false;
         this->setNetLabel(CF_S("netinfo_oppo_leave").c_str(), Color3B::RED);
         this->unschedule(schedule_selector(GameSceneNet::receiveMoveFromServerTimerBack));
+    }
+    else if (0 == strRet.compare("success"))
+    {
+        UINT uiReadChess = 0;
+        UINT uiReadPosX = 0;
+        UINT uiReadPosY = 0;
+        sscanf(strBuff.c_str(), "ret=success chess=%d posx=%d posy=%d", &uiReadChess, &uiReadPosX, &uiReadPosY);
+        GameSceneNet::moveChessSelf(uiReadChess, uiReadPosX, uiReadPosY);
+        GameScene::moveChess(uiReadChess, uiReadPosX, uiReadPosY);
     }
 }
 
@@ -186,7 +194,7 @@ void GameSceneNet::getOppenetIdFromServer(float dt)
     request->setRequestType(HttpRequest::Type::POST);
     request->setResponseCallback(this, httpresponse_selector(GameSceneNet::receiveOpponentIdFromServer));
     char aucBuf[256] = { 0 };
-    sprintf(aucBuf, "uiNetId=%d", this->uiNetId);
+    sprintf(aucBuf, "uid=%d&ignore=0", this->uiNetId);
     request->setRequestData(aucBuf, strlen(aucBuf) + 1);
     request->setTag("Find opponent");
     HttpClient::getInstance()->send(request);
@@ -205,18 +213,15 @@ void GameSceneNet::receiveOpponentIdFromServer(HttpClient* client, HttpResponse*
     //读取响应
     std::vector<char> *buffer = response->getResponseData();
     std::string strBuff(buffer->begin(), buffer->end());
+    log("receive find game %s", strBuff.c_str());
 
-    UINT uiReadId = 0;
-    UINT uiReadColor = 0;
-    sscanf(strBuff.c_str(), "opponent=%dcolor=%d", &uiReadId, &uiReadColor);
+    UINT uiGame = 0;
+    UINT uiBlack = 0;
+    char aucRed[32] = { 0 };
+    char aucBlack[32] = { 0 };
+    sscanf(strBuff.c_str(), "game=%d uib=%d black=%s red=%s", &uiGame, &uiBlack, &aucBlack, &aucRed);
 
-    if (0 == uiReadId)
-    {
-        log("get opponent %d error", uiReadId);
-        this->menuCloseGame(this);
-    }
-
-    if (1 == uiReadId)
+    if (0 == uiGame)
     {
         log("have no opponent now");
     }
@@ -224,10 +229,18 @@ void GameSceneNet::receiveOpponentIdFromServer(HttpClient* client, HttpResponse*
     {
         this->unschedule(schedule_selector(GameSceneNet::getOppenetIdFromServer));
 
-        this->uiOpponentId = uiReadId;
-        this->uiLocalColor = uiReadColor;
+        if(this->uiNetId == uiBlack)
+        {
+            this->strOppoName = std::string(aucRed);
+            this->uiLocalColor = CHESSCOCLOR_BLACK;
+        }
+        else
+        {
+            this->strOppoName = std::string(aucBlack);
+            this->uiLocalColor = CHESSCOCLOR_RED;
+        }
 
-        if (CHESSCOCLOR_RED == uiReadColor)
+        if (CHESSCOCLOR_RED == this->uiLocalColor)
         {
             this->schedule(schedule_selector(GameSceneNet::receiveMoveFromServerTimerBack), CF_T("timer_netgame_short"));
         }
@@ -245,6 +258,13 @@ void GameSceneNet::receiveOpponentIdFromServer(HttpClient* client, HttpResponse*
         {
             this->setNetLabel(CF_S("netinfo_local_black").c_str(), Color3B::YELLOW);
         }
+
+        log("opponent name %s", this->strOppoName.c_str());
+        auto pStr = String::createWithFormat("%s: %s", CF_S("netinfo_oppo_name").c_str(), this->strOppoName.c_str());
+        auto pLabelOp = Label::createWithTTF(pStr->getCString(), Config::getFilename("fonts_cn"), CF_FT("font_info"));
+        this->pInfoGround->addChild(pLabelOp);
+        pLabelOp->setPosition(this->pInfoGround->getContentSize().width * 0.5, this->pInfoGround->getContentSize().height * CF_P("pos_game_opponame"));
+        pLabelOp->setColor(Color3B::BLUE);
     }
     response->getHttpRequest()->release();
 }
@@ -259,7 +279,7 @@ void GameSceneNet::sendLeaveGameToServer(void)
     request->setUrl(strHost.c_str());
     request->setRequestType(HttpRequest::Type::POST);
     char aucBuf[256] = { 0 };
-    sprintf(aucBuf, "uiNetId=%d", this->uiNetId);
+    sprintf(aucBuf, "uid=%d&ignore=0", this->uiNetId);
     request->setRequestData(aucBuf, strlen(aucBuf) + 1);
     request->setTag("Leave game");
     HttpClient::getInstance()->send(request);

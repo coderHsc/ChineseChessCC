@@ -14,9 +14,9 @@
         <key>path_move_send</key>
         <string>/chessMove</string>
         <key>path_move_get</key>
-        <string>/chessMoveGet</string>
+        <string>/getOppoMove</string>
         <key>path_match_oppo</key>
-        <string>/findOpponent</string>
+        <string>/findGame</string>
         <key>path_leave_game</key>
         <string>/leaveGame</string>
     </dict>

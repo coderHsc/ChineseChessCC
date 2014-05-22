@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
+	"game"
 	"log"
 	"net/http"
 	"strconv"
 	"toolsql"
+	"user"
 )
 
 type sErr struct {
@@ -29,10 +31,10 @@ func routeInit() {
 	http.HandleFunc("/regUser", hUserRegister)
 	http.HandleFunc("/login", hUserLogin)
 	http.HandleFunc("/logoff", hUserLogoff)
-	//http.HandleFunc("/findOpponent", hFindGame)
-	//http.HandleFunc("/chessMove", netChessMove)
-	//http.HandleFunc("/chessMoveGet", netChessMoveGet)
-	//http.HandleFunc("/leaveGame", netLeaveGame)
+	http.HandleFunc("/findGame", hFindGame)
+	http.HandleFunc("/chessMove", hChessMove)
+	http.HandleFunc("/getOppoMove", hGetOppoMove)
+	http.HandleFunc("/leaveGame", hLeaveGame)
 }
 
 func routeDeInit() {
@@ -70,7 +72,7 @@ func hUserRegister(w http.ResponseWriter, r *http.Request) {
 
 	u, p := parseUsernameAndPasswd(r)
 
-	id, ret := RegisterUser(u, p)
+	id, ret := user.RegisterUser(u, p)
 	fmt.Fprintf(w, "uid=%d reason %s", id, ret)
 }
 
@@ -85,7 +87,7 @@ func hUserLogin(w http.ResponseWriter, r *http.Request) {
 
 	u, p := parseUsernameAndPasswd(r)
 
-	id, ret := LoginUser(u, p)
+	id, ret := user.LoginUser(u, p)
 	fmt.Fprintf(w, "uid=%d reason %s", id, ret)
 }
 
@@ -101,8 +103,59 @@ func hUserLogoff(w http.ResponseWriter, r *http.Request) {
 	id := parseUid(r)
 
 	if 0 != id {
-		LogoffUser(id)
+		user.LogoffUser(id)
 	}
+}
+
+func hFindGame(w http.ResponseWriter, r *http.Request) {
+	log.Println("request: find game")
+
+	err := checkRequest(r)
+	if nil != err {
+		log.Println("request:", err)
+		return
+	}
+
+	ret := game.FindGame(parseUid(r))
+	fmt.Fprintln(w, ret)
+}
+
+func hChessMove(w http.ResponseWriter, r *http.Request) {
+	log.Println("request:chess move")
+
+	err := checkRequest(r)
+	if nil != err {
+		log.Println("request:", err)
+		return
+	}
+
+	ret := game.ChessMove(parseUid(r), parseChessMove(r))
+	fmt.Fprintln(w, ret)
+}
+
+func hGetOppoMove(w http.ResponseWriter, r *http.Request) {
+	log.Println("request:get opponent move")
+
+	err := checkRequest(r)
+	if nil != err {
+		log.Println("request:", err)
+		return
+	}
+
+	ret := game.GetOppoMove(parseUid(r))
+	fmt.Fprintln(w, ret)
+}
+
+func hLeaveGame(w http.ResponseWriter, r *http.Request) {
+	log.Println("request:leave game")
+
+	err := checkRequest(r)
+	if nil != err {
+		log.Println("request:", err)
+		return
+	}
+
+	game.LeaveGame(parseUid(r))
 }
 
 func checkRequest(r *http.Request) error {
@@ -118,7 +171,7 @@ func checkRequest(r *http.Request) error {
 func parseUsernameAndPasswd(r *http.Request) (u, p string) {
 	u = r.Form.Get("user")
 	p = r.Form.Get("passwd")
-	log.Printf("parse-> username:%s(%d), passwd:%s(%d)\n", u, len(u), "passwd", p, len(p))
+	log.Printf("parse-> username:%s(%d), passwd:%s(%d)\n", u, len(u), p, len(p))
 
 	return
 }
@@ -127,7 +180,18 @@ func parseUid(r *http.Request) int {
 	id, _ := strconv.Atoi(r.Form.Get("uid"))
 	log.Printf("parse-> uid: %d", id)
 
+	user.LogCheck(id)
+
 	return id
+}
+
+func parseChessMove(r *http.Request) game.MoveRecord {
+	c, _ := strconv.Atoi(r.Form.Get("chess"))
+	x, _ := strconv.Atoi(r.Form.Get("posX"))
+	y, _ := strconv.Atoi(r.Form.Get("posY"))
+	log.Printf("parse-> chess: %d, posx: %d, posy: %d", c, x, y)
+
+	return game.MoveRecord{c, x, y}
 }
 
 func printRequest(r *http.Request) {

@@ -172,7 +172,7 @@ bool GameScene::checkChessMoveIsValid(UINT uiChessId, UINT uiPosY, UINT uiPosX)
     return this->pChessGame->CheckChessMoveValid(uiChessId, uiPosX, uiPosY);
 }
 
-void GameScene::moveChess(UINT uiChessId, UINT uiPosY, UINT uiPosX)
+bool GameScene::moveChess(UINT uiChessId, UINT uiPosY, UINT uiPosX)
 {
     log("chess moving, chess id :%d, move (%d, %d)", uiChessId, uiPosX, uiPosY);
 
@@ -201,14 +201,14 @@ void GameScene::moveChess(UINT uiChessId, UINT uiPosY, UINT uiPosX)
     if (CHESSTYPE_KING == this->pChessGame->GetChessType(uiTargetId))
     {
         this->setGameWin();
+        return true;
     }
     else
     {
         //将军判断和处理
         chessCheckmate();
+        return false;
     }
-
-    return;
 }
 
 void GameScene::chessCheckmate(void)

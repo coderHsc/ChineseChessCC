@@ -17,7 +17,7 @@ public:
 	CREATE_FUNC(GameSceneNet);
 
 	virtual bool checkChessMoveIsValid(UINT uiChessId, UINT uiPosX, UINT uiPosY);
-	virtual void moveChess(UINT uiChessId, UINT uiPosX, UINT uiPosY);
+	virtual bool moveChess(UINT uiChessId, UINT uiPosX, UINT uiPosY);
 	static GameScene* getGameScene();
 
     virtual void setGameWin(void);
@@ -41,7 +41,7 @@ private:
 
 	UINT uiNetId;
     UINT uiLocalColor;
-    UINT uiOpponentId;
+    std::string strOppoName;
 	bool bCanMove;
     cocos2d::Label* pNetLabel;
     std::string strServerHost;

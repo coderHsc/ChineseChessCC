@@ -12,6 +12,7 @@ var g_db *sql.DB = nil
 
 type SqlUserInfo struct {
 	iUid          int
+	name          string
 	last_login    string
 	general_score int64
 	general_times int
@@ -176,17 +177,19 @@ func (pstUserInfo *SqlUserInfo) getUserInfo(iUid int) {
 	}
 
 	//按照uid查询用户信息
-	rows := g_db.QueryRow("select last_login, general_score, general_times from t_user where uid=?", iUid)
+	rows := g_db.QueryRow("select username, last_login, general_score, general_times from t_user where uid=?", iUid)
+	var tmpName string
 	var tmpLastLogin string
 	var tmpScore int64
 	var tmpTimes int
-	err := rows.Scan(&tmpLastLogin, &tmpScore, &tmpTimes)
+	err := rows.Scan(&tmpName, &tmpLastLogin, &tmpScore, &tmpTimes)
 	if nil != err {
 		log.Panicln("database error: select row ->", err)
 		return
 	}
 
 	pstUserInfo.iUid = iUid
+	pstUserInfo.name = tmpName
 	pstUserInfo.last_login = tmpLastLogin
 	pstUserInfo.general_score = tmpScore
 	pstUserInfo.general_times = tmpTimes
@@ -215,4 +218,8 @@ func GetUserGeneralScore(iUid int) int64 {
 
 func GetUserGeneralTimes(iUid int) int {
 	return getUserInfo(iUid).general_times
+}
+
+func GetUserName(iUid int) string {
+	return getUserInfo(iUid).name
 }
